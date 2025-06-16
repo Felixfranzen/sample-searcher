@@ -1,9 +1,10 @@
 import ffmpeg from 'fluent-ffmpeg';
+import  { AutoProcessor, ClapAudioModelWithProjection, AutoTokenizer, ClapTextModelWithProjection } from '@xenova/transformers'
+
 
 export class ClapModel {
   async generateEmbedding(filePath: string): Promise<number[]> {
     // Load processor and audio model
-    const { AutoProcessor, ClapAudioModelWithProjection } = await import('@xenova/transformers');
     const processor = await AutoProcessor.from_pretrained('Xenova/clap-htsat-unfused');
     const audio_model = await ClapAudioModelWithProjection.from_pretrained('Xenova/clap-htsat-unfused');
 
@@ -40,7 +41,6 @@ export class ClapModel {
 
   async generateTextEmbedding(text: string): Promise<number[]> {
     // Load tokenizer and text model
-    const { AutoTokenizer, ClapTextModelWithProjection } = await import('@xenova/transformers');
     const tokenizer = await AutoTokenizer.from_pretrained('Xenova/clap-htsat-unfused');
     const text_model = await ClapTextModelWithProjection.from_pretrained('Xenova/clap-htsat-unfused');
 
