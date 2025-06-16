@@ -2,3 +2,4 @@ node_modules
 audio
 assets
 output
+.DS_Store
