@@ -2,7 +2,8 @@ import fs from 'fs-extra';
 import path from 'path';
 import { ClapModel } from '../utils/clapModel';
 import { AudioAnalysisResult, AudioEmbedding } from '../types/index';
-import { HierarchicalNSW } from 'hnswlib-node'
+import pkg from 'hnswlib-node';
+const { HierarchicalNSW } = pkg;
 
 async function findAudioFiles(audioDirectory: string): Promise<string[]> {
   const audioFiles: string[] = [];

@@ -2,13 +2,14 @@
   "name": "sample-searcher-ts",
   "version": "1.0.0",
   "description": "Audio sample analysis and search using CLAP embeddings",
+  "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "node --loader ts-node/esm src/scripts/analyze.ts",
-    "analyze": "npx ts-node src/scripts/analyze.ts",
-    "search": "npx ts-node src/scripts/search.ts",
+    "analyze": "node --loader ts-node/esm src/scripts/analyze.ts",
+    "search": "node --loader ts-node/esm src/scripts/search.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
