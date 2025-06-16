@@ -1,12 +1,11 @@
-export interface AudioEmbedding {
+export interface AudioMetadata {
   filePath: string;
-  embedding: number[];
   timestamp: number;
 }
 
 export interface AudioAnalysisResult {
-  embeddings: AudioEmbedding[];
-  metadata: {
+  metadata: AudioMetadata[];
+  stats: {
     totalFiles: number;
     processedFiles: number;
     failedFiles: number;

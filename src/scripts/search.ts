@@ -16,22 +16,22 @@ async function main() {
   console.log(`\nSearching for: '${query}'`);
 
   try {
-    // Load the vector store and embeddings
+    // Load the vector store and metadata
     const outputDir = path.join(process.cwd(), 'output');
     const vectorStorePath = path.join(outputDir, 'vector_store.bin');
-    const embeddingsPath = path.join(outputDir, 'embeddings.json');
+    const metadataPath = path.join(outputDir, 'metadata.json');
 
-    if (!await fs.pathExists(vectorStorePath) || !await fs.pathExists(embeddingsPath)) {
-      throw new Error('Vector store or embeddings not found. Please run analyze.ts first.');
+    if (!await fs.pathExists(vectorStorePath) || !await fs.pathExists(metadataPath)) {
+      throw new Error('Vector store or metadata not found. Please run analyze.ts first.');
     }
 
     // Initialize components
     const clapModel = new ClapModel();
     const vectorStore = new HierarchicalNSW('cosine', 512);
     vectorStore.readIndexSync(vectorStorePath);
-    const embeddings = await fs.readJson(embeddingsPath);
+    const metadata = await fs.readJson(metadataPath);
 
-    console.log(`Loaded index with ${embeddings.embeddings.length} audio files`);
+    console.log(`Loaded index with ${metadata.metadata.length} audio files`);
 
     // Generate text embedding
     const textEmbedding = await clapModel.generateTextEmbedding(query);
@@ -45,7 +45,7 @@ async function main() {
     for (let i = 0; i < neighbors.length; i++) {
       const idx = neighbors[i];
       const distance = distances[i];
-      const audioFile = embeddings.embeddings[idx];
+      const audioFile = metadata.metadata[idx];
       // Convert cosine distance to similarity score (0 to 1 range)
       // Cosine distance of 0 means perfect similarity (1.0)
       // Cosine distance of 2 means perfect dissimilarity (0.0)

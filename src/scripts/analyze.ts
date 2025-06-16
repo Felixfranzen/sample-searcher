@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { ClapModel } from '../utils/clapModel';
-import { AudioAnalysisResult, AudioEmbedding } from '../types/index';
+import { AudioAnalysisResult, AudioMetadata } from '../types/index';
 import pkg from 'hnswlib-node';
 const { HierarchicalNSW } = pkg;
 
@@ -56,8 +56,8 @@ async function main() {
   // Process files
   const audioFiles = await findAudioFiles(audioDir);
   const result: AudioAnalysisResult = {
-    embeddings: [],
-    metadata: {
+    metadata: [],
+    stats: {
       totalFiles: audioFiles.length,
       processedFiles: 0,
       failedFiles: 0,
@@ -74,20 +74,19 @@ async function main() {
       // Process audio file
       const embedding = await clapModel.generateEmbedding(filePath);
 
-      // Store embedding
-      const audioEmbedding: AudioEmbedding = {
+      // Store metadata
+      const audioMetadata: AudioMetadata = {
         filePath,
-        embedding,
         timestamp: Date.now()
       };
       
-      result.embeddings.push(audioEmbedding);
-      vectorStore.addPoint(embedding, result.embeddings.length - 1);
+      result.metadata.push(audioMetadata);
+      vectorStore.addPoint(embedding, result.metadata.length - 1);
       
-      result.metadata.processedFiles++;
+      result.stats.processedFiles++;
     } catch (error) {
       console.error(`Failed to process ${filePath}:`, error);
-      result.metadata.failedFiles++;
+      result.stats.failedFiles++;
     }
   }
 
@@ -95,9 +94,9 @@ async function main() {
   const outputDir = path.join(process.cwd(), 'output');
   await fs.ensureDir(outputDir);
   
-  // Save embeddings
+  // Save metadata
   await fs.writeJson(
-    path.join(outputDir, 'embeddings.json'),
+    path.join(outputDir, 'metadata.json'),
     result,
     { spaces: 2 }
   );
@@ -105,12 +104,12 @@ async function main() {
   // Save vector store
   vectorStore.writeIndexSync(path.join(outputDir, 'vector_store.bin'));
 
-  result.metadata.duration = Date.now() - startTime;
+  result.stats.duration = Date.now() - startTime;
   
   console.log('\nAnalysis complete!');
-  console.log(`Processed ${result.metadata.processedFiles} files`);
-  console.log(`Failed ${result.metadata.failedFiles} files`);
-  console.log(`Duration: ${(result.metadata.duration / 1000).toFixed(2)}s`);
+  console.log(`Processed ${result.stats.processedFiles} files`);
+  console.log(`Failed ${result.stats.failedFiles} files`);
+  console.log(`Duration: ${(result.stats.duration / 1000).toFixed(2)}s`);
   console.log(`Results saved to ${outputDir}`);
 }
 
