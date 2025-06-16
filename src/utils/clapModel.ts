@@ -27,12 +27,10 @@ export class ClapModel {
       textModel
     }
   }
-  async generateEmbedding(filePath: string): Promise<number[]> {
-    // Load processor and audio model
-    const { processor, audioModel } = await this.getInstance()
 
-    // Convert audio to the right format using ffmpeg
-    const audioBuffer = await new Promise<Buffer>((resolve, reject) => {
+
+  async readAudioFile(filePath: string) {
+    return new Promise<Buffer>((resolve, reject) => {
       const chunks: Buffer[] = [];
       ffmpeg(filePath)
         .toFormat('wav')
@@ -44,6 +42,14 @@ export class ClapModel {
         .pipe()
         .on('data', (chunk: Buffer) => chunks.push(chunk));
     });
+  }
+
+  async generateEmbedding(filePath: string): Promise<number[]> {
+    // Load processor and audio model
+    const { processor, audioModel } = await this.getInstance()
+
+    // Convert audio to the right format using ffmpeg
+    const audioBuffer = await this.readAudioFile(filePath);
 
     // Convert 16-bit PCM to Float32Array
     const pcmData = new Int16Array(audioBuffer.buffer, audioBuffer.byteOffset, audioBuffer.byteLength / 2);
