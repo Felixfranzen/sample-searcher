@@ -44,7 +44,7 @@ export class ClapModel {
     });
   }
 
-  async generateEmbedding(filePath: string): Promise<number[]> {
+  async generateAudioEmbedding(filePath: string): Promise<number[]> {
     // Load processor and audio model
     const { processor, audioModel } = await this.getInstance()
 

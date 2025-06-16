@@ -72,7 +72,7 @@ async function main() {
       console.log(`Processing ${filePath}...`);
       
       // Process audio file
-      const embedding = await clapModel.generateEmbedding(filePath);
+      const embedding = await clapModel.generateAudioEmbedding(filePath);
 
       // Store metadata
       const audioMetadata: AudioMetadata = {
