@@ -1,12 +1,35 @@
 import ffmpeg from 'fluent-ffmpeg';
-import  { AutoProcessor, ClapAudioModelWithProjection, AutoTokenizer, ClapTextModelWithProjection } from '@xenova/transformers'
+import  { AutoProcessor, ClapAudioModelWithProjection, AutoTokenizer, ClapTextModelWithProjection, Processor, PreTrainedModel, PreTrainedTokenizer } from '@xenova/transformers'
 
+
+type ModelInstance = {
+  processor: Processor
+  audioModel: PreTrainedModel
+  
+  tokenizer: PreTrainedTokenizer
+  textModel: PreTrainedModel
+}
 
 export class ClapModel {
+  private instance: ModelInstance | null = null
+  async getInstance() {
+    if (this.instance) {
+      return this.instance
+    }
+    const processor = await AutoProcessor.from_pretrained('Xenova/clap-htsat-unfused');
+    const audioModel = await ClapAudioModelWithProjection.from_pretrained('Xenova/clap-htsat-unfused');
+    const tokenizer = await AutoTokenizer.from_pretrained('Xenova/clap-htsat-unfused');
+    const textModel = await ClapTextModelWithProjection.from_pretrained('Xenova/clap-htsat-unfused');
+    return {
+      processor,
+      audioModel,
+      tokenizer,
+      textModel
+    }
+  }
   async generateEmbedding(filePath: string): Promise<number[]> {
     // Load processor and audio model
-    const processor = await AutoProcessor.from_pretrained('Xenova/clap-htsat-unfused');
-    const audio_model = await ClapAudioModelWithProjection.from_pretrained('Xenova/clap-htsat-unfused');
+    const { processor, audioModel } = await this.getInstance()
 
     // Convert audio to the right format using ffmpeg
     const audioBuffer = await new Promise<Buffer>((resolve, reject) => {
@@ -29,10 +52,10 @@ export class ClapModel {
       audioData[i] = pcmData[i] / 32768.0;  // Normalize to [-1, 1]
     }
 
-    const audio_inputs = await processor(audioData);
+    const audioInputs = await processor(audioData);
 
     // Compute embeddings
-    const { audio_embeds } = await audio_model(audio_inputs);
+    const { audio_embeds } = await audioModel(audioInputs);
     
     // Convert to regular array if needed
     const embedding = Array.from(audio_embeds.data) as number[];
@@ -41,14 +64,13 @@ export class ClapModel {
 
   async generateTextEmbedding(text: string): Promise<number[]> {
     // Load tokenizer and text model
-    const tokenizer = await AutoTokenizer.from_pretrained('Xenova/clap-htsat-unfused');
-    const text_model = await ClapTextModelWithProjection.from_pretrained('Xenova/clap-htsat-unfused');
+    const { tokenizer, textModel } = await this.getInstance()
 
     // Process text
     const text_inputs = await tokenizer(text, { padding: true, truncation: true });
 
     // Compute embeddings
-    const { text_embeds } = await text_model(text_inputs);
+    const { text_embeds } = await textModel(text_inputs);
     
     // Convert to regular array
     const embedding = Array.from(text_embeds.data) as number[];
