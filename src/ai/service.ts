@@ -1,5 +1,4 @@
 import fs from 'fs-extra'
-import path from 'path'
 import { createEmbeddingStorage } from './storage';
 import { createClapModel } from './clapModel';
 import { findAudioFiles } from './files';
