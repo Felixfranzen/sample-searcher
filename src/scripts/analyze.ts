@@ -5,6 +5,7 @@ import { createEmbeddingStorage } from '../storage';
 import { findAudioFiles } from '../files';
 
 import pkg from 'hnswlib-node';
+import { analyze } from '../service';
 const { HierarchicalNSW } = pkg;
 
 
@@ -23,22 +24,9 @@ const main = async () => {
   
   const startTime = Date.now();
   
-  const storage = createEmbeddingStorage({ outputDir: "./output" })
-  const model = await createClapModel()
-  
-  const audioFiles = await findAudioFiles(audioDir);
-  console.log(`Found ${audioFiles.length} audio files to process`);
-
-  for (const filePath of audioFiles) {
-    console.log(`Processing: ${filePath}`)
-    const embedding = await model.generateAudioEmbedding(filePath)
-    storage.add({ filePath, embedding })
-  }
-
-  storage.saveToDisc();
+  await analyze({ audioDir, embeddingsOutputDir: 'output' })
   
   console.log('\nAnalysis complete!');
-  console.log(`Processed ${storage.get().metadata.stats.totalFiles} files`);
   console.log(`Duration: ${((Date.now() - startTime) / 1000).toFixed(2)}s`);
 };
 

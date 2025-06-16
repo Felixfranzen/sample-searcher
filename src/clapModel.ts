@@ -17,6 +17,7 @@ export const createClapModel = async () => {
   const readAndFormatAudioFile = async (filePath: string): Promise<Buffer> => {
     return new Promise<Buffer>((resolve, reject) => {
       const chunks: Buffer[] = [];
+      // TODO load ffmpeg on system correctly
       ffmpeg(filePath)
         .toFormat('wav')
         .audioFrequency(48000)

@@ -10,7 +10,7 @@ type Metadata = {
     }
 }
 
-export const createEmbeddingStorage = (config: { outputDir: string }) => {
+export const createEmbeddingStorage = (config: { storageDir: string }) => {
     let metadata: Metadata = {
         files: [],
         stats: {
@@ -28,17 +28,17 @@ export const createEmbeddingStorage = (config: { outputDir: string }) => {
     }
 
     const saveToDisc = async () => {
-        await fs.ensureDir(config.outputDir);
+        await fs.ensureDir(config.storageDir);
         await fs.writeJson(
-            path.join(config.outputDir, 'metadata.json'),
+            path.join(config.storageDir, 'metadata.json'),
             metadata,
             { spaces: 2 }
           );
-          vectorStore.writeIndexSync(path.join(config.outputDir, 'vector_store.bin'));
+          vectorStore.writeIndexSync(path.join(config.storageDir, 'vector_store.bin'));
     }
 
     const loadFromDisc = async () => {
-        const outputDir = path.join(process.cwd(), config.outputDir);
+        const outputDir = path.join(process.cwd(), config.storageDir);
         const vectorStorePath = path.join(outputDir, 'vector_store.bin');
         const metadataPath = path.join(outputDir, 'metadata.json');
 
