@@ -4,18 +4,10 @@ import { createEmbeddingStorage } from './storage';
 import { createClapModel } from './clapModel';
 import { findAudioFiles } from './files';
 
-export const analyze = async ({ audioDir, embeddingsOutputDir }: { audioDir: string, embeddingsOutputDir: string  }) => {    
-    if (!audioDir) {
-        console.error('Please provide a directory path for audio files');
-        process.exit(1);
-    }
-    
+export const analyze = async ({ audioDir, embeddingsOutputDir }: { audioDir: string, embeddingsOutputDir: string  }) => {        
     if (!await fs.pathExists(audioDir)) {
-        console.error(`Directory ${audioDir} does not exist`);
-        process.exit(1);
+        throw new Error(`Directory ${audioDir} does not exist`);   
     }
-    
-    const startTime = Date.now();
     
     const storage = createEmbeddingStorage({ storageDir: embeddingsOutputDir })
     const model = await createClapModel()
