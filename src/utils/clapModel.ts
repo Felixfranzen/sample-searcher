@@ -1,85 +1,77 @@
 import ffmpeg from 'fluent-ffmpeg';
-import  { AutoProcessor, ClapAudioModelWithProjection, AutoTokenizer, ClapTextModelWithProjection, Processor, PreTrainedModel, PreTrainedTokenizer } from '@xenova/transformers'
-
+import { AutoProcessor, ClapAudioModelWithProjection, AutoTokenizer, ClapTextModelWithProjection, Processor, PreTrainedModel, PreTrainedTokenizer } from '@xenova/transformers'
 
 type ModelInstance = {
   processor: Processor
   audioModel: PreTrainedModel
-  
   tokenizer: PreTrainedTokenizer
   textModel: PreTrainedModel
 }
 
-export class ClapModel {
-  private instance: ModelInstance | null = null
-  async getInstance() {
-    if (this.instance) {
-      return this.instance
-    }
-    const processor = await AutoProcessor.from_pretrained('Xenova/clap-htsat-unfused');
-    const audioModel = await ClapAudioModelWithProjection.from_pretrained('Xenova/clap-htsat-unfused');
-    const tokenizer = await AutoTokenizer.from_pretrained('Xenova/clap-htsat-unfused');
-    const textModel = await ClapTextModelWithProjection.from_pretrained('Xenova/clap-htsat-unfused');
-    return {
-      processor,
-      audioModel,
-      tokenizer,
-      textModel
-    }
+// State management through closure
+let modelInstance: ModelInstance | null = null;
+
+const getInstance = async (): Promise<ModelInstance> => {
+  if (modelInstance) {
+    return modelInstance;
+  }
+  
+  const processor = await AutoProcessor.from_pretrained('Xenova/clap-htsat-unfused');
+  const audioModel = await ClapAudioModelWithProjection.from_pretrained('Xenova/clap-htsat-unfused');
+  const tokenizer = await AutoTokenizer.from_pretrained('Xenova/clap-htsat-unfused');
+  const textModel = await ClapTextModelWithProjection.from_pretrained('Xenova/clap-htsat-unfused');
+  
+  modelInstance = {
+    processor,
+    audioModel,
+    tokenizer,
+    textModel
+  };
+  
+  return modelInstance;
+};
+
+const readAudioFile = async (filePath: string): Promise<Buffer> => {
+  return new Promise<Buffer>((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    ffmpeg(filePath)
+      .toFormat('wav')
+      .audioFrequency(48000)
+      .audioChannels(1)
+      .audioCodec('pcm_s16le')
+      .on('error', reject)
+      .on('end', () => resolve(Buffer.concat(chunks)))
+      .pipe()
+      .on('data', (chunk: Buffer) => chunks.push(chunk));
+  });
+};
+
+const generateAudioEmbedding = async (filePath: string): Promise<number[]> => {
+  const { processor, audioModel } = await getInstance();
+  const audioBuffer = await readAudioFile(filePath);
+
+  // Convert 16-bit PCM to Float32Array
+  const pcmData = new Int16Array(audioBuffer.buffer, audioBuffer.byteOffset, audioBuffer.byteLength / 2);
+  const audioData = new Float32Array(pcmData.length);
+  for (let i = 0; i < pcmData.length; i++) {
+    audioData[i] = pcmData[i] / 32768.0;  // Normalize to [-1, 1]
   }
 
+  const audioInputs = await processor(audioData);
+  const { audio_embeds } = await audioModel(audioInputs);
+  
+  return Array.from(audio_embeds.data) as number[];
+};
 
-  async readAudioFile(filePath: string) {
-    return new Promise<Buffer>((resolve, reject) => {
-      const chunks: Buffer[] = [];
-      ffmpeg(filePath)
-        .toFormat('wav')
-        .audioFrequency(48000)
-        .audioChannels(1)
-        .audioCodec('pcm_s16le')  // Use 16-bit PCM encoding
-        .on('error', reject)
-        .on('end', () => resolve(Buffer.concat(chunks)))
-        .pipe()
-        .on('data', (chunk: Buffer) => chunks.push(chunk));
-    });
-  }
+const generateTextEmbedding = async (text: string): Promise<number[]> => {
+  const { tokenizer, textModel } = await getInstance();
+  const text_inputs = await tokenizer(text, { padding: true, truncation: true });
+  const { text_embeds } = await textModel(text_inputs);
+  
+  return Array.from(text_embeds.data) as number[];
+};
 
-  async generateAudioEmbedding(filePath: string): Promise<number[]> {
-    // Load processor and audio model
-    const { processor, audioModel } = await this.getInstance()
-
-    // Convert audio to the right format using ffmpeg
-    const audioBuffer = await this.readAudioFile(filePath);
-
-    // Convert 16-bit PCM to Float32Array
-    const pcmData = new Int16Array(audioBuffer.buffer, audioBuffer.byteOffset, audioBuffer.byteLength / 2);
-    const audioData = new Float32Array(pcmData.length);
-    for (let i = 0; i < pcmData.length; i++) {
-      audioData[i] = pcmData[i] / 32768.0;  // Normalize to [-1, 1]
-    }
-
-    const audioInputs = await processor(audioData);
-
-    // Compute embeddings
-    const { audio_embeds } = await audioModel(audioInputs);
-    
-    // Convert to regular array if needed
-    const embedding = Array.from(audio_embeds.data) as number[];
-    return embedding;
-  }
-
-  async generateTextEmbedding(text: string): Promise<number[]> {
-    // Load tokenizer and text model
-    const { tokenizer, textModel } = await this.getInstance()
-
-    // Process text
-    const text_inputs = await tokenizer(text, { padding: true, truncation: true });
-
-    // Compute embeddings
-    const { text_embeds } = await textModel(text_inputs);
-    
-    // Convert to regular array
-    const embedding = Array.from(text_embeds.data) as number[];
-    return embedding;
-  }
-} 
+export const clapModel = {
+  generateAudioEmbedding,
+  generateTextEmbedding
+}; 
