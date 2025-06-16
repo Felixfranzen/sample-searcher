@@ -6,50 +6,60 @@ const { HierarchicalNSW } = pkg;
 
 async function main() {
   const query = process.argv[2];
-  const k = parseInt(process.argv[3] || '5'); // Number of results to return, default 5
+  const k = parseInt(process.argv[3] || '10'); // Number of results to return, default 10
 
   if (!query) {
     console.error('Please provide a search query');
     process.exit(1);
   }
 
-  // Load the vector store and embeddings
-  const outputDir = path.join(process.cwd(), 'output');
-  const vectorStorePath = path.join(outputDir, 'vector_store.bin');
-  const embeddingsPath = path.join(outputDir, 'embeddings.json');
+  console.log(`\nSearching for: '${query}'`);
 
-  if (!await fs.pathExists(vectorStorePath) || !await fs.pathExists(embeddingsPath)) {
-    console.error('Vector store or embeddings not found. Please run analyze.ts first.');
+  try {
+    // Load the vector store and embeddings
+    const outputDir = path.join(process.cwd(), 'output');
+    const vectorStorePath = path.join(outputDir, 'vector_store.bin');
+    const embeddingsPath = path.join(outputDir, 'embeddings.json');
+
+    if (!await fs.pathExists(vectorStorePath) || !await fs.pathExists(embeddingsPath)) {
+      throw new Error('Vector store or embeddings not found. Please run analyze.ts first.');
+    }
+
+    // Initialize components
+    const clapModel = new ClapModel();
+    const vectorStore = new HierarchicalNSW('cosine', 512);
+    vectorStore.readIndexSync(vectorStorePath);
+    const embeddings = await fs.readJson(embeddingsPath);
+
+    console.log(`Loaded index with ${embeddings.embeddings.length} audio files`);
+
+    // Generate text embedding
+    const textEmbedding = await clapModel.generateTextEmbedding(query);
+
+    // Search for similar audio files
+    const { neighbors, distances } = vectorStore.searchKnn(textEmbedding, k);
+
+    // Display results
+    console.log('\nTop 10 matches:');
+    console.log('-'.repeat(50));
+    for (let i = 0; i < neighbors.length; i++) {
+      const idx = neighbors[i];
+      const distance = distances[i];
+      const audioFile = embeddings.embeddings[idx];
+      // Convert cosine distance to similarity score (0 to 1 range)
+      // Cosine distance of 0 means perfect similarity (1.0)
+      // Cosine distance of 2 means perfect dissimilarity (0.0)
+      const similarity = Math.max(0.0, 1.0 - (distance / 2.0));
+
+      console.log(`${i + 1}. ${path.basename(audioFile.filePath)}`);
+      console.log(`   Similarity: ${similarity.toFixed(3)} (distance: ${distance.toFixed(3)})`);
+      console.log(`   ${similarity > 0.5 ? '✓' : '✗'} ${similarity > 0.5 ? 'Good match' : 'Poor match'}`);
+      console.log('-'.repeat(50));
+    }
+  } catch (error) {
+    console.error(`Error: ${error instanceof Error ? error.message : error}`);
     process.exit(1);
-  }
-
-  // Initialize components
-  const clapModel = new ClapModel();
-  const vectorStore = new HierarchicalNSW('cosine', 512);
-  vectorStore.readIndexSync(vectorStorePath);
-  const embeddings = await fs.readJson(embeddingsPath);
-
-  // Generate text embedding
-  console.log('Generating text embedding...');
-  const textEmbedding = await clapModel.generateTextEmbedding(query);
-
-  // Search for similar audio files
-  console.log('Searching for similar audio files...');
-  const { neighbors, distances } = vectorStore.searchKnn(textEmbedding, k);
-
-  // Display results
-  console.log('\nSearch Results:');
-  console.log('---------------');
-  for (let i = 0; i < neighbors.length; i++) {
-    const idx = neighbors[i];
-    const distance = distances[i];
-    const audioFile = embeddings.embeddings[idx];
-    const similarity = 1 - distance; // Convert distance to similarity score
-
-    console.log(`\n${i + 1}. ${path.basename(audioFile.filePath)}`);
-    console.log(`   Path: ${audioFile.filePath}`);
-    console.log(`   Similarity: ${(similarity * 100).toFixed(2)}%`);
   }
 }
 
-main().catch(console.error); 
+main(); 
