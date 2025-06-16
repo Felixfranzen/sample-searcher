@@ -1,31 +1,33 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { AudioProcessor } from '../utils/audioProcessor';
 import { ClapModel } from '../utils/clapModel';
 import { AudioAnalysisResult, AudioEmbedding } from '../types/index';
-import { HierarchicalNSW } from 'hnswlib-node';
+import { HierarchicalNSW } from 'hnswlib-node'
 
-async function findAudioFiles(dirPath: string): Promise<string[]> {
+async function findAudioFiles(audioDirectory: string): Promise<string[]> {
   const audioFiles: string[] = [];
-  
-  async function scanDirectory(currentPath: string) {
-    const entries = await fs.readdir(currentPath, { withFileTypes: true });
-    
+  const supportedExtensions = ['.wav', '.mp3', '.ogg', '.flac', '.m4a'];
+
+  async function scanDirectory(dir: string) {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+
     for (const entry of entries) {
-      const fullPath = path.join(currentPath, entry.name);
-      
+      const fullPath = path.join(dir, entry.name);
+
       if (entry.isDirectory()) {
+        // Recursively scan subdirectories
         await scanDirectory(fullPath);
       } else if (entry.isFile()) {
+        // Check if the file has a supported audio extension
         const ext = path.extname(entry.name).toLowerCase();
-        if (['.wav', '.mp3', '.ogg', '.flac', '.m4a'].includes(ext)) {
+        if (supportedExtensions.includes(ext)) {
           audioFiles.push(fullPath);
         }
       }
     }
   }
-  
-  await scanDirectory(dirPath);
+
+  await scanDirectory(audioDirectory);
   return audioFiles;
 }
 
@@ -44,9 +46,7 @@ async function main() {
   }
 
   // Initialize components
-  const audioProcessor = new AudioProcessor();
-  const clapModel = new ClapModel(path.join(__dirname, '../../assets/clap_model.onnx'));
-  await clapModel.initialize();
+  const clapModel = new ClapModel();
 
   // Create vector store
   const vectorStore = new HierarchicalNSW('cosine', 512); // CLAP embeddings are 512-dimensional
@@ -71,11 +71,8 @@ async function main() {
       console.log(`Processing ${filePath}...`);
       
       // Process audio file
-      const audioData = await audioProcessor.processAudioFile(filePath);
-      
-      // Generate embedding
-      const embedding = await clapModel.generateEmbedding(audioData);
-      
+      const embedding = await clapModel.generateEmbedding(filePath);
+
       // Store embedding
       const audioEmbedding: AudioEmbedding = {
         filePath,
