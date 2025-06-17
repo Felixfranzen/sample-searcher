@@ -7,9 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build && electron-builder",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
-    "script:analyze": "NODE_OPTIONS='--loader ts-node/esm' node src/ai/scripts/analyze.ts",
-    "script:search": "NODE_OPTIONS='--loader ts-node/esm' node src/ai/scripts/search.ts"
+    "preview": "vite preview"
   },
   "dependencies": {
     "react": "^18.2.0",
