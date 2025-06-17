@@ -1,5 +1,5 @@
 import { dialog, IpcMain, ipcRenderer } from "electron"
-import * as Ai from './ai/service'
+// import * as Ai from './ai/service'
 
 export enum APIEvent {
     OPEN_SELECT_FILE_DIALOG = 'OPEN_SELECT_FILE_DIALOG',
@@ -25,6 +25,6 @@ export const registerHandlers = (ipcMain: IpcMain) => {
 
   ipcMain.handle(APIEvent.START_ANALYSIS, async (_, filePath: string) => {
     console.log('bro')
-    Ai.analyze({ audioDir: filePath, embeddingsOutputDir: 'output '})
+    // Ai.analyze({ audioDir: filePath, embeddingsOutputDir: 'output '})
   });
 }
