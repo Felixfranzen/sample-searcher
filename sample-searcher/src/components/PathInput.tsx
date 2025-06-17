@@ -1,41 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export const PathInput = () => {
-  const [selectedPaths, setSelectedPaths] = useState<string[]>([])
+  const [selectedPath, setSelectedPath] = useState<string>()
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [currentFile, setCurrentFile] = useState<string | null>(null)
-  const [completedFiles, setCompletedFiles] = useState<Set<string>>(new Set())
-
-  useEffect(() => {
-    const cleanup = window.api.onAnalysisProgress((filePath) => {
-      setCurrentFile(filePath)
-      setCompletedFiles(prev => {
-        const newSet = new Set(prev)
-        if (currentFile) {
-          newSet.add(currentFile)
-        }
-        return newSet
-      })
-    })
-
-    // Add cleanup function to mark the last file as completed
-    return () => {
-      cleanup()
-      if (currentFile) {
-        setCompletedFiles(prev => {
-          const newSet = new Set(prev)
-          newSet.add(currentFile)
-          return newSet
-        })
-      }
-    }
-  }, [currentFile])
 
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault()
     try {
-      const paths = await window.api.openSelectFileDialog()
-      setSelectedPaths(paths)
+      const path = await window.api.openSelectFileDialog()
+      setSelectedPath(path)
     } catch (e) {
       console.error('Error selecting files:', e)
     }
@@ -43,27 +16,16 @@ export const PathInput = () => {
 
   const handleSubmit = async (e: React.MouseEvent) => {
     e.preventDefault()
-    if (selectedPaths.length === 0) return
+    if (!selectedPath) return
 
     setIsAnalyzing(true)
-    setCurrentFile(null)
-    setCompletedFiles(new Set())
     try {
-      await window.api.startAnalysis(selectedPaths)
+      await window.api.startAnalysis(selectedPath)
     } catch (e) {
       console.error('Error during analysis:', e)
     } finally {
       setIsAnalyzing(false)
-      setCurrentFile(null)
     }
-  }
-
-  const handleClear = (e: React.MouseEvent) => {
-    e.preventDefault()
-    setSelectedPaths([])
-    setCurrentFile(null)
-    setCompletedFiles(new Set())
-    setIsAnalyzing(false)
   }
 
   return (
@@ -78,25 +40,10 @@ export const PathInput = () => {
           onClick={handleClick}
           className="submit-button"
         >
-          Select files
+          Select directory
         </button>
-        {selectedPaths.length > 0 && (
-          <button
-            onClick={handleClear}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#dc3545',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-          >
-            Clear
-          </button>
-        )}
       </div>
-      {selectedPaths.length > 0 && (
+      {selectedPath && (
         <>
           <table className="selected-paths-table" style={{
             borderCollapse: 'collapse',
@@ -106,53 +53,19 @@ export const PathInput = () => {
             maxWidth: '80%'
           }}>
             <tbody>
-              {selectedPaths.map((path, index) => (
-                <tr key={index}>
+                <tr>
                   <td style={{
                     border: '1px solid #ddd',
                     padding: '8px',
                     fontFamily: 'monospace',
                     wordBreak: 'break-all',
-                    textAlign: 'left',
-                    backgroundColor: currentFile === path 
-                      ? '#e6f3ff' 
-                      : completedFiles.has(path)
-                        ? '#e6ffe6'
-                        : 'transparent',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
+                    textAlign: 'left'
                   }}>
-                    {currentFile === path && (
-                      <div style={{
-                        width: '12px',
-                        height: '12px',
-                        minWidth: '12px',
-                        minHeight: '12px',
-                        border: '2px solid #0066cc',
-                        borderTop: '2px solid transparent',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite',
-                        flexShrink: 0
-                      }} />
-                    )}
-                    {completedFiles.has(path) && (
-                      <span style={{ color: '#00cc00' }}>✓</span>
-                    )}
-                    {path}
+                    {selectedPath}
                   </td>
                 </tr>
-              ))}
             </tbody>
           </table>
-          <style>
-            {`
-              @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-              }
-            `}
-          </style>
           <button
             onClick={handleSubmit}
             style={{
