@@ -17,7 +17,18 @@ export const PathInput = () => {
         return newSet
       })
     })
-    return cleanup
+
+    // Add cleanup function to mark the last file as completed
+    return () => {
+      cleanup()
+      if (currentFile) {
+        setCompletedFiles(prev => {
+          const newSet = new Set(prev)
+          newSet.add(currentFile)
+          return newSet
+        })
+      }
+    }
   }, [currentFile])
 
   const handleClick = async (e: React.MouseEvent) => {
@@ -47,6 +58,14 @@ export const PathInput = () => {
     }
   }
 
+  const handleClear = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setSelectedPaths([])
+    setCurrentFile(null)
+    setCompletedFiles(new Set())
+    setIsAnalyzing(false)
+  }
+
   return (
     <div className="path-input-container" style={{ 
       display: 'flex', 
@@ -54,12 +73,29 @@ export const PathInput = () => {
       alignItems: 'center',
       width: '100%'
     }}>
-      <button 
-        onClick={handleClick}
-        className="submit-button"
-      >
-        Select files
-      </button>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <button 
+          onClick={handleClick}
+          className="submit-button"
+        >
+          Select files
+        </button>
+        {selectedPaths.length > 0 && (
+          <button
+            onClick={handleClear}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#dc3545',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Clear
+          </button>
+        )}
+      </div>
       {selectedPaths.length > 0 && (
         <>
           <table className="selected-paths-table" style={{
