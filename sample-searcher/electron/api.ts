@@ -27,7 +27,7 @@ export const registerHandlers = (ipcMain: IpcMain) => {
   ipcMain.handle(APIEvent.START_ANALYSIS, async (_, filePath: string) => {
     console.log('Starting analysis for:', filePath)
     // Lazy load AI service only when needed
-    const { analyze } = await import('./ai/service.js')
+    const { analyze } = await import('../ai/service.js')
     await analyze({ audioDir: filePath, embeddingsOutputDir: 'output' })
     console.log('Analysis complete!')
   });
@@ -35,7 +35,7 @@ export const registerHandlers = (ipcMain: IpcMain) => {
   ipcMain.handle(APIEvent.SEARCH, async (_, query: string, resultsCount: number) => {
     console.log('Searching for:', query)
     // Lazy load AI service only when needed
-    const { search } = await import('./ai/service.js')
+    const { search } = await import('../ai/service.js')
     const results = await search({
       embeddingsDir: 'output',
       query,
