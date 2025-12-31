@@ -1,5 +1,5 @@
 import fs from 'fs-extra'
-import { createEmbeddingStorage } from './storage-local';
+import { createEmbeddingStorage } from './storage';
 import { createClapModel } from './clapModel';
 import { findAudioFiles } from './files';
 
