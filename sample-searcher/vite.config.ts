@@ -11,6 +11,19 @@ export default defineConfig({
       main: {
         // Shortcut of `build.lib.entry`.
         entry: 'electron/main.ts',
+        vite: {
+          build: {
+            rollupOptions: {
+              external: [
+                'onnxruntime-node',
+                'hnswlib-node',
+                'fluent-ffmpeg',
+                'fs-extra',
+                '@xenova/transformers',
+              ],
+            },
+          },
+        },
       },
       preload: {
         // Shortcut of `build.rollupOptions.input`.
