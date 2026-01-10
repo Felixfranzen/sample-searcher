@@ -19,5 +19,6 @@ export const registerHandlers = ({ service }: { service: Service }) => {
     console.log('Search: ', query, limit)
     const result = await service.search(query, limit)
     console.log(result)
+    return result
   });
 }

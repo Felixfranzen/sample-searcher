@@ -6,7 +6,7 @@ export enum APIEvent {
 }
 
 export type API = {
-  openSelectFileDialog: () => Promise<void>
+  openSelectFileDialog: () => Promise<string>
   startAnalysis: (path: string) => Promise<void>
-  search: (query: string, limit: number) => Promise<void>
+  search: (query: string, limit: number) => Promise<Array<{ filePath: string, similarity: number }>>
 }
