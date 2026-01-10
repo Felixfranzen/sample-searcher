@@ -1,4 +1,5 @@
 import { dialog, IpcMain, ipcRenderer } from "electron"
+import { Repository } from "../src/support/storage"
 
 export enum APIEvent {
     OPEN_SELECT_FILE_DIALOG = 'OPEN_SELECT_FILE_DIALOG',
@@ -16,7 +17,7 @@ export const api = {
 export type Api = typeof api
 
 
-export const registerHandlers = (ipcMain: IpcMain) => {
+export const registerHandlers = ({ database, ipcMain }: { database: Repository, ipcMain: IpcMain }) => {
   ipcMain.handle(APIEvent.OPEN_SELECT_FILE_DIALOG, async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog({
       properties: ['openDirectory']
@@ -25,6 +26,7 @@ export const registerHandlers = (ipcMain: IpcMain) => {
   });
 
   ipcMain.handle(APIEvent.START_ANALYSIS, async (_, filePath: string) => {
+    console.log(filePath)
   });
 
   ipcMain.handle(APIEvent.SEARCH, async (_, query: string, resultsCount: number) => {

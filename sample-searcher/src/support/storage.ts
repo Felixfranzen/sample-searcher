@@ -5,7 +5,7 @@ import path from 'path'
 
 export const createDatabase = (userDataPath: any) => {
   // SETUP
-
+  // TODO keep tables on restart
   const dbPath = path.join(userDataPath, 'app.db')
   const db = new Database(dbPath)
   sqllitevec.load(db)
@@ -72,3 +72,5 @@ const deserializeEmbedding = (buffer: Buffer): Float32Array => {
   }
   return result;
 }
+
+export type Repository = ReturnType<typeof createDatabase>

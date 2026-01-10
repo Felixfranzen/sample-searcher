@@ -71,10 +71,8 @@ app.on('activate', () => {
 
 app.whenReady().then(() => {
   const userDataPath = app.getPath('userData')
-  const storage = Storage.createDatabase(userDataPath)
-  storage.saveFile('/abc', exampleVector)
-  storage.searchKNN(exampleVectorAlt, 1)
-  registerHandlers(ipcMain)
+  const database = Storage.createDatabase(userDataPath)
+  registerHandlers({ database, ipcMain })
 
   createWindow()
 })
