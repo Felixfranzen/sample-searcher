@@ -47,7 +47,7 @@ export const createDatabase = (userDataPath: any) => {
     
     return similarFiles.map(({ rowid, distance }) => {
       const file = db.prepare("SELECT id, file_path FROM files WHERE id = ?").get(rowid) as { id: number, file_path: string };
-      return { filePath: file.file_path, similarity: 1 - distance };
+      return { filePath: file.file_path, distance };
     });
   }
 

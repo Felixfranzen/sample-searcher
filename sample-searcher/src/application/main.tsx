@@ -105,7 +105,7 @@ function App() {
                       {result.filePath}
                     </td>
                     <td style={{ padding: '10px' }}>
-                      {(result.similarity * 100).toFixed(2)}%
+                      {result.distance}
                     </td>
                   </tr>
                 ))}
