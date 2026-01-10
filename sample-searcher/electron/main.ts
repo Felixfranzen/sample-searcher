@@ -1,11 +1,10 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow } from 'electron'
 //import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
-import { registerHandlers } from './api'
-import * as Storage from '../src/support/storage'
-import exampleVector from '../example-vector.json'
-import exampleVectorAlt from '../example-vector-alt.json'
+import { registerHandlers } from './handlers'
+import { createDatabase } from '../src/support/storage'
+import { createService } from '../src/support/service'
 
 // const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -69,10 +68,11 @@ app.on('activate', () => {
   }
 })
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   const userDataPath = app.getPath('userData')
-  const database = Storage.createDatabase(userDataPath)
-  registerHandlers({ database, ipcMain })
+  const repository = createDatabase(userDataPath)
+  const service = await createService({ repository })
+  registerHandlers({ service })
 
   createWindow()
 })

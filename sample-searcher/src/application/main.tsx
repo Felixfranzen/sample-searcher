@@ -1,16 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 
-declare global {
-  interface Window {
-    api: {
-      openSelectFileDialog: () => Promise<string>
-      startAnalysis: (filePath: string) => Promise<void>
-      search: (query: string, resultsCount?: number) => Promise<any>
-    }
-  }
-}
-
 function App() {
   const [selectedPath, setSelectedPath] = React.useState<string>('')
 

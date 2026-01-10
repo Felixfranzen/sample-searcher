@@ -1,0 +1,23 @@
+import { dialog, ipcMain } from "electron"
+import { APIEvent } from './api'
+import { Service } from "../src/support/service";
+
+export const registerHandlers = ({ service }: { service: Service }) => {
+  ipcMain.handle(APIEvent.OPEN_SELECT_FILE_DIALOG, async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      properties: ['openDirectory']
+    })
+    return canceled ? [] : filePaths[0]
+  });
+
+  ipcMain.handle(APIEvent.START_ANALYSIS, async (_, dirPath: string) => {
+    console.log('Start analyzing: ', dirPath)
+    await service.analyze(dirPath)
+  });
+
+  ipcMain.handle(APIEvent.SEARCH, async (_, query: string, limit: number) => {
+    console.log('Search: ', query, limit)
+    const result = await service.search(query, limit)
+    console.log(result)
+  });
+}
