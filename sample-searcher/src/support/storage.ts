@@ -20,7 +20,7 @@ export const createDatabase = (userDataPath: any) => {
       embedding BLOB
     );
 
-    CREATE VIRTUAL TABLE vss_files USING vec0(embedding float[512]);
+    CREATE VIRTUAL TABLE vss_files USING vec0(embedding float[512] distance_metric=cosine);
   `);
 
   const result = db.prepare("SELECT vec_version() AS vec_version").get() as { vec_version: string };
