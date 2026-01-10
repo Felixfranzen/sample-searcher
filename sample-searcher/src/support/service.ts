@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 import path from "path";
+import { ClapModel } from './clapModel'
 import { Repository } from "./storage";
-import { createClapModel } from "./clapModel";
 
 const findAudioFiles = async (audioDirectory: string): Promise<string[]> => {
   const audioFiles: string[] = [];
@@ -28,9 +28,7 @@ const findAudioFiles = async (audioDirectory: string): Promise<string[]> => {
   return audioFiles;
 };
 
-export const createService = async ({ repository }: { repository: Repository }) => {
-  const model = await createClapModel();
-
+export const createService = ({ model, repository }: { model: ClapModel, repository: Repository }) => {
   const analyze = async (path: string) => {
     if (!(await fs.pathExists(path))) {
       throw new Error(`Directory ${path} does not exist`);
@@ -59,4 +57,4 @@ export const createService = async ({ repository }: { repository: Repository }) 
   return { analyze, search };
 };
 
-export type Service = Awaited<ReturnType<typeof createService>>
+export type Service = ReturnType<typeof createService>

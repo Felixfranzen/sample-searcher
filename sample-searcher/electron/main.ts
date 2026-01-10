@@ -5,6 +5,7 @@ import path from 'node:path'
 import { registerHandlers } from './handlers'
 import { createDatabase } from '../src/support/storage'
 import { createService } from '../src/support/service'
+import { createClapModel } from '../src/support/clapModel'
 
 // const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -71,7 +72,8 @@ app.on('activate', () => {
 app.whenReady().then(async () => {
   const userDataPath = app.getPath('userData')
   const repository = createDatabase(userDataPath)
-  const service = await createService({ repository })
+  const model = await createClapModel()
+  const service = createService({ model, repository })
   registerHandlers({ service })
 
   createWindow()
