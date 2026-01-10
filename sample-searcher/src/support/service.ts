@@ -40,7 +40,6 @@ export const createService = ({ model, repository }: { model: ClapModel, reposit
     for (const filePath of audioFiles) {
       console.log(`Processing: ${filePath}`);
       const embedding = await model.generateAudioEmbedding(filePath);
-      console.log(embedding)
       repository.saveFile(filePath, embedding);
     }
     console.log('Done!')

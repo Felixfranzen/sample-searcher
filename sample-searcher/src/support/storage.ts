@@ -35,8 +35,7 @@ export const createDatabase = (userDataPath: any) => {
   const saveFile = (filePath: string, embedding: number[]) => {
     const serializedEmbedding = serializeEmbedding(embedding)
     const info = db.prepare("INSERT INTO files (file_path, embedding) VALUES (?, ?)").run(filePath, serializedEmbedding)
-    // TODO fix the rowid issue
-    db.prepare("INSERT INTO vss_files (rowid, embedding) VALUES (1, ?)").run(serializedEmbedding)
+    db.prepare("INSERT INTO vss_files (rowid, embedding) VALUES (?, ?)").run(BigInt(info.lastInsertRowid), serializedEmbedding)
   }
 
   const searchKNN = (embedding: number[], limit: number) => {
