@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { registerHandlers } from './api'
 import * as Storage from '../src/support/storage'
+import exampleVector from '../example-vector.json'
+import exampleVectorAlt from '../example-vector-alt.json'
 
 // const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -70,8 +72,8 @@ app.on('activate', () => {
 app.whenReady().then(() => {
   const userDataPath = app.getPath('userData')
   const storage = Storage.createDatabase(userDataPath)
-  storage.saveFile('/abc', Buffer.from([1,1,1,1]))
-  storage.searchKNN(Buffer.from([1,1,1,1]), 1)
+  storage.saveFile('/abc', exampleVector)
+  storage.searchKNN(exampleVectorAlt, 1)
   registerHandlers(ipcMain)
 
   createWindow()
