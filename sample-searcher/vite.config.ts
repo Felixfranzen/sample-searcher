@@ -15,6 +15,8 @@ export default defineConfig({
           build: {
             rollupOptions: {
               external: [
+                'better-sqlite3',
+                'sqlite-vec',
                 'onnxruntime-node',
                 'hnswlib-node',
                 'fluent-ffmpeg',
