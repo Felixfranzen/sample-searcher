@@ -72,9 +72,16 @@ app.on('activate', () => {
 app.whenReady().then(async () => {
   const userDataPath = app.getPath('userData')
   const repository = createDatabase(userDataPath)
+  console.log('--- database created')
+
   const model = await createClapModel()
+  console.log('--- model created')
+
   const service = createService({ model, repository })
+  console.log('--- service created')
+
   registerHandlers({ service })
+  console.log('--- handlers registered')
 
   createWindow()
 })
