@@ -1,6 +1,6 @@
 import { dialog, ipcMain } from "electron"
 import { APIEvent } from './api'
-import { Service } from "../service/service";
+import { Service } from "./service/service";
 
 export const registerHandlers = ({ service }: { service: Service }) => {
   ipcMain.handle(APIEvent.OPEN_SELECT_FILE_DIALOG, async () => {

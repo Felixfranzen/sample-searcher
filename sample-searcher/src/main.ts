@@ -3,9 +3,9 @@ import { app, BrowserWindow } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { registerHandlers } from './handlers'
-import { createDatabase } from '../service/storage'
-import { createService } from '../service/service'
-import { createClapModel } from '../service/clapModel'
+import { createDatabase } from './service/storage'
+import { createService } from './service/service'
+import { createClapModel } from './service/clapModel'
 
 // const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
