@@ -62,7 +62,11 @@ export const createService = ({ model, repository }: { model: ClapModel, reposit
     repository.deleteDirectory(directoryId)
   }
 
-  return { analyze, search, deleteDirectory };
+  const getDirectories = () => {
+    return repository.getDirectories()
+  }
+
+  return { analyze, search, deleteDirectory, getDirectories };
 };
 
 export type Service = ReturnType<typeof createService>

@@ -3,7 +3,8 @@ export enum APIEvent {
     START_ANALYSIS = 'START_ANALYSIS',
     ANALYSIS_PROGRESS = 'ANALYSIS_PROGRESS',
     SEARCH = 'SEARCH',
-    DELETE_DIRECTORY = "DELETE_DIRECTORY"
+    DELETE_DIRECTORY = "DELETE_DIRECTORY",
+    GET_DIRECTORIES = "GET_DIRECTORIES"
 }
 
 export type API = {
@@ -19,4 +20,5 @@ export type API = {
     totalFiles: number
   }) => void) => void
   deleteDirectory: (directoryId: number) => void
+  getDirectories: () => Promise<Array<{ id: number, path: string, totalFiles: number, analyzedFiles: number }>>
 }

@@ -10,7 +10,8 @@ const api: API = {
     });
   },
   search: async (query: string, resultsCount: number = 10) => ipcRenderer.invoke(APIEvent.SEARCH, query, resultsCount),
-  deleteDirectory: (directoryId: number) => ipcRenderer.invoke(APIEvent.DELETE_DIRECTORY, directoryId)
+  deleteDirectory: (directoryId: number) => ipcRenderer.invoke(APIEvent.DELETE_DIRECTORY, directoryId),
+  getDirectories: async () => ipcRenderer.invoke(APIEvent.GET_DIRECTORIES)
 }
 
 contextBridge.exposeInMainWorld('api', api)

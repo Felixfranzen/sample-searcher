@@ -17,6 +17,17 @@ function App() {
   const [searchResults, setSearchResults] = React.useState<any[]>([])
 
   React.useEffect(() => {
+    // Load existing directories on mount
+    const loadDirectories = async () => {
+      const existingDirectories = await window.api.getDirectories()
+      setDirectories(existingDirectories)
+      if (existingDirectories.length > 0) {
+        const maxId = Math.max(...existingDirectories.map(d => d.id))
+        setNextId(maxId + 1)
+      }
+    }
+    loadDirectories()
+
     // Listen for progress updates
     window.api.onAnalysisProgress((progress: { directory: { id: number, path: string }, analyzedFiles: number, totalFiles: number }) => {
       setDirectories(prevDirectories =>
@@ -54,7 +65,7 @@ function App() {
   const handleSearch = async () => {
     if (!searchQuery.trim()) return
     console.log('Searching for:', searchQuery)
-    const results = await window.api.search(searchQuery, 10)
+    const results = await window.api.search(searchQuery, 50)
     setSearchResults(results)
     console.log('Search results:', results)
   }

@@ -4,31 +4,25 @@ import path from "path";
 
 export const createDatabase = (userDataPath: any) => {
   // SETUP
-  // TODO keep tables on restart
   const dbPath = path.join(userDataPath, "app.db");
   const db = new Database(dbPath);
   sqllitevec.load(db);
 
   db.exec(`
-    DROP TABLE IF EXISTS files;
-    DROP TABLE IF EXISTS directories;
-    DROP TABLE IF EXISTS file_directory_memberships;
-    DROP TABLE IF EXISTS vss_files;
-    
-    CREATE TABLE files (
+    CREATE TABLE IF NOT EXISTS files (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       file_path TEXT UNIQUE,
       embedding BLOB
     );
 
-    CREATE VIRTUAL TABLE vss_files USING vec0(embedding float[512] distance_metric=cosine);
+    CREATE VIRTUAL TABLE IF NOT EXISTS vss_files USING vec0(embedding float[512] distance_metric=cosine);
 
-    CREATE TABLE directories (
+    CREATE TABLE IF NOT EXISTS directories (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       directory_path TEXT UNIQUE NOT NULL
     );
 
-    CREATE TABLE file_directory_memberships (
+    CREATE TABLE IF NOT EXISTS file_directory_memberships (
       file_id INTEGER NOT NULL,
       directory_id INTEGER NOT NULL,
       PRIMARY KEY (file_id, directory_id)
@@ -116,11 +110,33 @@ export const createDatabase = (userDataPath: any) => {
     });
   };
 
+  const getDirectories = () => {
+    const directories = db
+      .prepare(
+        `SELECT 
+          d.id, 
+          d.directory_path,
+          COUNT(DISTINCT fdm.file_id) as file_count
+         FROM directories d
+         LEFT JOIN file_directory_memberships fdm ON d.id = fdm.directory_id
+         GROUP BY d.id, d.directory_path`
+      )
+      .all() as { id: number; directory_path: string; file_count: number }[];
+    
+    return directories.map(({ id, directory_path, file_count }) => ({
+      id,
+      path: directory_path,
+      totalFiles: file_count,
+      analyzedFiles: file_count
+    }));
+  };
+
   return {
     insertDirectory,
     upsertFile,
     deleteDirectory,
     searchKNN,
+    getDirectories,
   };
 };
 
