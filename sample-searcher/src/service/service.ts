@@ -55,8 +55,7 @@ export const createService = ({ model, repository }: { model: ClapModel, reposit
     limit: number
   ) => {
     const textEmbedding = await model.generateTextEmbedding(query);
-    repository.deleteDirectory(1)
-    return []// repository.searchKNN(textEmbedding, limit);
+    return repository.searchKNN(textEmbedding, limit);
   };
 
   return { analyze, search };
