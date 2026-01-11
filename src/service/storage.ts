@@ -76,6 +76,7 @@ export const createDatabase = (userDataPath: any) => {
     // note: lastInsertedRowId doesn't work for upserts
     const { id: fileId } = db.prepare("SELECT id FROM files WHERE file_path = ?").get(filePath) as { id: number }
 
+    // note: upserts not supported for the virtual vector tables
     db.prepare("DELETE FROM vss_files WHERE rowid = ?").run(
       BigInt(fileId)
     );
