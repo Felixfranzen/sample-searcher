@@ -37,11 +37,13 @@ export const createService = ({ model, repository }: { model: ClapModel, reposit
     const audioFiles = await findAudioFiles(path);
     console.log(`Found ${audioFiles.length} audio files to process`);
 
+    const directoryId = repository.insertDirectory(path)
+
     let analyzedCount = 0
     for (const filePath of audioFiles) {
       console.log(`Processing: ${filePath}`);
       const embedding = await model.generateAudioEmbedding(filePath);
-      repository.saveFile(filePath, embedding);
+      repository.upsertFile(directoryId, filePath, embedding);
       analyzedCount++
       onProgress({ analyzedFiles: analyzedCount, totalFiles: audioFiles.length })
     }
@@ -53,7 +55,8 @@ export const createService = ({ model, repository }: { model: ClapModel, reposit
     limit: number
   ) => {
     const textEmbedding = await model.generateTextEmbedding(query);
-    return repository.searchKNN(textEmbedding, limit);
+    repository.deleteDirectory(1)
+    return []// repository.searchKNN(textEmbedding, limit);
   };
 
   return { analyze, search };
