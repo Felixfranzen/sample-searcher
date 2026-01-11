@@ -8,6 +8,8 @@ interface Directory {
   totalFiles?: number
 }
 
+const monoFont = "'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', 'Droid Sans Mono', 'Source Code Pro', monospace"
+
 function App() {
   const [directories, setDirectories] = React.useState<Directory[]>([])
   const [nextId, setNextId] = React.useState(1)
@@ -58,73 +60,104 @@ function App() {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', fontFamily: 'system-ui' }}>
+    <div style={{ display: 'flex', height: '100vh', fontFamily: 'system-ui', backgroundColor: '#0a0a0a', color: '#fff' }}>
       {/* Sidebar */}
       <div style={{
-        width: '350px',
-        backgroundColor: '#f5f5f5',
-        borderRight: '1px solid #ddd',
+        width: '320px',
+        backgroundColor: '#111',
+        borderRight: '1px solid #222',
         display: 'flex',
         flexDirection: 'column',
-        padding: '20px'
+        padding: '12px'
       }}>
-        <h2 style={{ margin: '0 0 20px 0' }}>Directories</h2>
-        <button
-          onClick={handleAddDirectory}
-          style={{
-            padding: '12px 20px',
-            fontSize: '16px',
-            cursor: 'pointer',
-            backgroundColor: '#4CAF50',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            marginBottom: '20px',
-            fontWeight: 'bold'
-          }}
-        >
-          + Add Directory
-        </button>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          marginBottom: '12px'
+        }}>
+          <span style={{ 
+            fontSize: '11px', 
+            fontWeight: '600', 
+            textTransform: 'uppercase', 
+            letterSpacing: '0.5px',
+            color: '#666'
+          }}>Directories</span>
+          <button
+            onClick={handleAddDirectory}
+            style={{
+              padding: '4px 8px',
+              fontSize: '11px',
+              cursor: 'pointer',
+              backgroundColor: '#fff',
+              color: '#000',
+              border: 'none',
+              borderRadius: '3px',
+              fontWeight: '500'
+            }}
+          >
+            + Add
+          </button>
+        </div>
 
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {directories.length === 0 ? (
-            <p style={{ color: '#666', textAlign: 'center', marginTop: '20px' }}>
-              No directories added yet
+            <p style={{ color: '#444', textAlign: 'center', marginTop: '20px', fontSize: '12px' }}>
+              No directories
             </p>
           ) : (
             directories.map(dir => (
               <div
                 key={dir.id}
                 style={{
-                  backgroundColor: 'white',
-                  borderRadius: '8px',
-                  padding: '15px',
-                  marginBottom: '12px',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                  backgroundColor: '#1a1a1a',
+                  borderRadius: '6px',
+                  padding: '14px',
+                  marginBottom: '10px',
+                  border: '1px solid #222'
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ flex: 1, marginRight: '10px', overflow: 'hidden' }}>
-                    <div style={{
-                      fontSize: '13px',
-                      fontWeight: '500',
-                      wordBreak: 'break-all',
-                      marginBottom: '8px'
-                    }}>
-                      {dir.path}
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#666' }}>
+                    {(() => {
+                      const parts = dir.path.split('/');
+                      const folderName = parts.pop() || '';
+                      const parentPath = parts.join('/');
+                      return (
+                        <>
+                          {parentPath && (
+                            <div style={{
+                              fontSize: '10px',
+                              fontFamily: monoFont,
+                              color: '#444',
+                              marginBottom: '3px',
+                              wordBreak: 'break-all',
+                              lineHeight: '1.3'
+                            }}>
+                              {parentPath}/
+                            </div>
+                          )}
+                          <div style={{
+                            fontSize: '13px',
+                            fontFamily: monoFont,
+                            wordBreak: 'break-all',
+                            color: '#ccc',
+                            lineHeight: '1.4'
+                          }}>
+                            {folderName}
+                          </div>
+                        </>
+                      );
+                    })()}
+                    <div style={{ fontSize: '11px', color: '#555', marginTop: '6px', fontFamily: monoFont }}>
                       {dir.totalFiles !== undefined ? (
                         dir.analyzedFiles === dir.totalFiles ? (
                           `${dir.totalFiles} files`
                         ) : (
-                          <>
-                            {dir.analyzedFiles} / {dir.totalFiles} files
-                            {' '}({dir.totalFiles > 0 ? Math.round((dir.analyzedFiles! / dir.totalFiles) * 100) : 0}%)
-                          </>
+                          `${dir.analyzedFiles}/${dir.totalFiles}`
                         )
                       ) : (
-                        <span style={{ fontStyle: 'italic' }}>Scanning...</span>
+                        'scanning...'
                       )}
                     </div>
                   </div>
@@ -134,29 +167,37 @@ function App() {
                       padding: '4px 8px',
                       fontSize: '12px',
                       cursor: 'pointer',
-                      backgroundColor: '#f44336',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px'
+                      backgroundColor: 'transparent',
+                      color: '#555',
+                      border: '1px solid #333',
+                      borderRadius: '3px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = '#fff';
+                      e.currentTarget.style.borderColor = '#555';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = '#555';
+                      e.currentTarget.style.borderColor = '#333';
                     }}
                   >
-                    Delete
+                    ×
                   </button>
                 </div>
 
                 {dir.totalFiles !== undefined && dir.analyzedFiles !== dir.totalFiles && (
                   <div style={{
                     width: '100%',
-                    height: '6px',
-                    backgroundColor: '#e0e0e0',
-                    borderRadius: '3px',
+                    height: '3px',
+                    backgroundColor: '#222',
+                    borderRadius: '2px',
                     overflow: 'hidden',
                     marginTop: '10px'
                   }}>
                     <div style={{
                       width: `${dir.totalFiles > 0 ? (dir.analyzedFiles! / dir.totalFiles) * 100 : 0}%`,
                       height: '100%',
-                      backgroundColor: '#4CAF50',
+                      backgroundColor: '#fff',
                       transition: 'width 0.3s ease'
                     }} />
                   </div>
@@ -168,24 +209,26 @@ function App() {
       </div>
 
       {/* Main Content */}
-      <div style={{ flex: 1, padding: '20px', overflowY: 'auto' }}>
-        <h1 style={{ marginTop: 0 }}>Sample Searcher</h1>
+      <div style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
+        <h1 style={{ marginTop: 0, fontSize: '20px', fontWeight: '500', letterSpacing: '-0.5px' }}>Sample Searcher</h1>
 
-        <div style={{ marginTop: '30px' }}>
-          <h2>Search</h2>
-          <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+        <div style={{ marginTop: '24px' }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              placeholder="Enter search query..."
+              placeholder="Search samples..."
               style={{
-                padding: '10px',
-                fontSize: '16px',
+                padding: '10px 14px',
+                fontSize: '14px',
                 flex: 1,
-                border: '1px solid #ccc',
-                borderRadius: '4px'
+                border: '1px solid #333',
+                borderRadius: '4px',
+                backgroundColor: '#111',
+                color: '#fff',
+                outline: 'none'
               }}
             />
             <button
@@ -193,39 +236,63 @@ function App() {
               disabled={!searchQuery.trim()}
               style={{
                 padding: '10px 20px',
-                fontSize: '16px',
+                fontSize: '14px',
                 cursor: searchQuery.trim() ? 'pointer' : 'not-allowed',
-                opacity: searchQuery.trim() ? 1 : 0.5,
-                backgroundColor: '#2196F3',
-                color: 'white',
+                opacity: searchQuery.trim() ? 1 : 0.3,
+                backgroundColor: '#fff',
+                color: '#000',
                 border: 'none',
-                borderRadius: '4px'
+                borderRadius: '4px',
+                fontWeight: '500'
               }}
             >
               Search
             </button>
           </div>
           {searchResults.length > 0 && (
-            <div style={{ marginTop: '20px' }}>
-              <h3>Results:</h3>
-              <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
+            <div style={{ marginTop: '24px' }}>
+              <div style={{ fontSize: '11px', color: '#555', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                {searchResults.length} results
+              </div>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr style={{ borderBottom: '2px solid #ddd', textAlign: 'left' }}>
-                    <th style={{ padding: '10px' }}>File Path</th>
-                    <th style={{ padding: '10px', width: '120px' }}>Distance</th>
+                  <tr style={{ borderBottom: '1px solid #222', textAlign: 'left' }}>
+                    <th style={{ padding: '8px 0', fontSize: '11px', fontWeight: '500', color: '#555', textTransform: 'uppercase', letterSpacing: '0.5px' }}>File</th>
+                    <th style={{ padding: '8px 0', width: '80px', fontSize: '11px', fontWeight: '500', color: '#555', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'right' }}>Distance</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {searchResults.map((result, index) => (
-                    <tr key={index} style={{ borderBottom: '1px solid #eee' }}>
-                      <td style={{ padding: '10px', fontFamily: 'monospace', fontSize: '14px' }}>
-                        {result.filePath}
-                      </td>
-                      <td style={{ padding: '10px' }}>
-                        {result.distance}
-                      </td>
-                    </tr>
-                  ))}
+                  {searchResults.map((result, index) => {
+                    const parts = result.filePath.split('/');
+                    const fileName = parts.pop() || result.filePath;
+                    const parentPath = parts.join('/');
+                    return (
+                      <tr key={index} style={{ borderBottom: '1px solid #1a1a1a' }}>
+                        <td style={{ padding: '12px 0' }}>
+                          {parentPath && (
+                            <div style={{
+                              fontFamily: monoFont,
+                              fontSize: '10px',
+                              color: '#444',
+                              marginBottom: '2px'
+                            }}>
+                              {parentPath}/
+                            </div>
+                          )}
+                          <div style={{
+                            fontFamily: monoFont,
+                            fontSize: '13px',
+                            color: '#ccc'
+                          }}>
+                            {fileName}
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 0', fontFamily: monoFont, fontSize: '12px', color: '#555', textAlign: 'right' }}>
+                          {typeof result.distance === 'number' ? result.distance.toFixed(3) : result.distance}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
