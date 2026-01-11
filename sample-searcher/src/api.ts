@@ -10,6 +10,10 @@ export type API = {
   startAnalysis: (path: string) => Promise<void>
   search: (query: string, limit: number) => Promise<Array<{ filePath: string, distance: number }>>
   onAnalysisProgress: (callback: (progress: {
+    directory: {
+      path: string,
+      id: number
+    }
     analyzedFiles: number
     totalFiles: number
   }) => void) => void

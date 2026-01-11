@@ -29,15 +29,15 @@ const findAudioFiles = async (audioDirectory: string): Promise<string[]> => {
 };
 
 export const createService = ({ model, repository }: { model: ClapModel, repository: Repository }) => {
-  const analyze = async (path: string, onProgress: (event: { analyzedFiles: number, totalFiles: number }) => void) => {
-    if (!(await fs.pathExists(path))) {
-      throw new Error(`Directory ${path} does not exist`);
+  const analyze = async (directoryPath: string, onProgress: (event: { directoryId: number, analyzedFiles: number, totalFiles: number }) => void) => {
+    if (!(await fs.pathExists(directoryPath))) {
+      throw new Error(`Directory ${directoryPath} does not exist`);
     }
 
-    const audioFiles = await findAudioFiles(path);
+    const audioFiles = await findAudioFiles(directoryPath);
     console.log(`Found ${audioFiles.length} audio files to process`);
 
-    const directoryId = repository.insertDirectory(path)
+    const directoryId = repository.insertDirectory(directoryPath)
 
     let analyzedCount = 0
     for (const filePath of audioFiles) {
@@ -45,7 +45,7 @@ export const createService = ({ model, repository }: { model: ClapModel, reposit
       const embedding = await model.generateAudioEmbedding(filePath);
       repository.upsertFile(directoryId, filePath, embedding);
       analyzedCount++
-      onProgress({ analyzedFiles: analyzedCount, totalFiles: audioFiles.length })
+      onProgress({ directoryId, analyzedFiles: analyzedCount, totalFiles: audioFiles.length })
     }
     console.log('Done!')
   };
