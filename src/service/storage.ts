@@ -108,7 +108,6 @@ export const createDatabase = (userDataPath: any) => {
       )
       .all(serializedEmbedding, limit) as { rowid: number; distance: number }[];
     
-    console.log(similarFiles)
     return similarFiles.map(({ rowid, distance }) => {
       const file = db
         .prepare("SELECT id, file_path FROM files WHERE id = ?")

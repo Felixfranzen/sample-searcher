@@ -30,7 +30,6 @@ export const registerHandlers = ({ service }: { service: Service }) => {
   ipcMain.handle(APIEvent.SEARCH, async (_, query: string, limit: number) => {
     console.log("Search: ", query, limit);
     const result = await service.search(query, limit);
-    console.log(result);
     return result;
   });
 
