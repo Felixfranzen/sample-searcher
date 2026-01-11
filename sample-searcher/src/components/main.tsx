@@ -95,7 +95,7 @@ function App() {
               <thead>
                 <tr style={{ borderBottom: '2px solid #ddd', textAlign: 'left' }}>
                   <th style={{ padding: '10px' }}>File Path</th>
-                  <th style={{ padding: '10px', width: '120px' }}>Similarity</th>
+                  <th style={{ padding: '10px', width: '120px' }}>Distance</th>
                 </tr>
               </thead>
               <tbody>
