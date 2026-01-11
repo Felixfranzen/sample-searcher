@@ -1,6 +1,7 @@
 {
   "appId": "YourAppID",
-  "productName": "YourAppName",
+  "productName": "SampleSearcher",
+  "asar": false,
   "directories": {
     "output": "release/${version}"
   },
@@ -8,12 +9,6 @@
     "dist",
     "dist-electron",
     "node_modules/**/*"
-  ],
-  "asarUnpack": [
-    "node_modules/better-sqlite3/**/*",
-    "node_modules/sqlite-vec/**/*",
-    "node_modules/onnxruntime-node/**/*",
-    "node_modules/hnswlib-node/**/*"
   ],
   "mac": {
     "target": "dmg"
