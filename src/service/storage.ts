@@ -132,12 +132,4 @@ const serializeEmbedding = (embedding: number[] | Float32Array): Buffer => {
   return buffer;
 };
 
-const deserializeEmbedding = (buffer: Buffer): Float32Array => {
-  const result = new Float32Array(buffer.length / 4);
-  for (let i = 0; i < result.length; i++) {
-    result[i] = buffer.readFloatLE(i * 4);
-  }
-  return result;
-};
-
 export type Repository = ReturnType<typeof createDatabase>;

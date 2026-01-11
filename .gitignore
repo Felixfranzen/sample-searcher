@@ -3,4 +3,6 @@ audio
 assets
 output
 .DS_Store
-.dist-electron
+dist
+dist-electron
+release
