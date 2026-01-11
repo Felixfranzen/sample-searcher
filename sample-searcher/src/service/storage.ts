@@ -93,7 +93,8 @@ export const createDatabase = (userDataPath: any) => {
     db.prepare("DELETE FROM directories WHERE id = ?").run(BigInt(directoryId))
     db.prepare("DELETE FROM file_directory_memberships WHERE directory_id = ?").run(BigInt(directoryId))
     // cleans up orphaned files
-    db.prepare("DELETE FROM files WHERE id NOT IN (SELECT DISTINCT file_id FROM file_directory_memberships);")
+    db.prepare("DELETE FROM files WHERE id NOT IN (SELECT DISTINCT file_id FROM file_directory_memberships);").run()
+    db.prepare("DELETE FROM vss_files WHERE rowid NOT IN (SELECT DISTINCT file_id FROM file_directory_memberships);").run()
   }
 
   const searchKNN = (embedding: number[], limit: number) => {
@@ -105,7 +106,8 @@ export const createDatabase = (userDataPath: any) => {
     `
       )
       .all(serializedEmbedding, limit) as { rowid: number; distance: number }[];
-
+    
+    console.log(similarFiles)
     return similarFiles.map(({ rowid, distance }) => {
       const file = db
         .prepare("SELECT id, file_path FROM files WHERE id = ?")

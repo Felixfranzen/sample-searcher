@@ -2,7 +2,8 @@ export enum APIEvent {
     OPEN_SELECT_FILE_DIALOG = 'OPEN_SELECT_FILE_DIALOG',
     START_ANALYSIS = 'START_ANALYSIS',
     ANALYSIS_PROGRESS = 'ANALYSIS_PROGRESS',
-    SEARCH = 'SEARCH'
+    SEARCH = 'SEARCH',
+    DELETE_DIRECTORY = "DELETE_DIRECTORY"
 }
 
 export type API = {
@@ -17,4 +18,5 @@ export type API = {
     analyzedFiles: number
     totalFiles: number
   }) => void) => void
+  deleteDirectory: (directoryId: number) => void
 }

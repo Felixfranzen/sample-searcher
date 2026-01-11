@@ -33,4 +33,9 @@ export const registerHandlers = ({ service }: { service: Service }) => {
     console.log(result);
     return result;
   });
+
+  ipcMain.handle(APIEvent.DELETE_DIRECTORY, (_: IpcMainInvokeEvent, directoryId: number) => {
+    console.log('Deleting directory: ', directoryId)
+    service.deleteDirectory(directoryId)
+  })
 };

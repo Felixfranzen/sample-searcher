@@ -44,6 +44,8 @@ function App() {
   }
 
   const handleDeleteDirectory = (id: number) => {
+    console.log('handle delte')
+    window.api.deleteDirectory(id)
     setDirectories(prev => prev.filter(dir => dir.id !== id))
   }
 
