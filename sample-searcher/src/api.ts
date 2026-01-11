@@ -9,4 +9,8 @@ export type API = {
   openSelectFileDialog: () => Promise<string>
   startAnalysis: (path: string) => Promise<void>
   search: (query: string, limit: number) => Promise<Array<{ filePath: string, distance: number }>>
+  onAnalysisProgress: (callback: (progress: {
+    analyzedFiles: number
+    totalFiles: number
+  }) => void) => void
 }

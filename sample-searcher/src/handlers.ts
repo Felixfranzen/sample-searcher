@@ -1,4 +1,4 @@
-import { dialog, ipcMain } from "electron"
+import { dialog, ipcMain, IpcMainInvokeEvent } from "electron"
 import { APIEvent } from './api'
 import { Service } from "./service/service";
 
@@ -10,9 +10,11 @@ export const registerHandlers = ({ service }: { service: Service }) => {
     return canceled ? [] : filePaths[0]
   });
 
-  ipcMain.handle(APIEvent.START_ANALYSIS, async (_, dirPath: string) => {
+  ipcMain.handle(APIEvent.START_ANALYSIS, async (event: IpcMainInvokeEvent, dirPath: string) => {
     console.log('Start analyzing: ', dirPath)
-    await service.analyze(dirPath)
+    await service.analyze(dirPath, (progressEvent) => {
+      event.sender.send(APIEvent.ANALYSIS_PROGRESS, progressEvent)
+    })
   });
 
   ipcMain.handle(APIEvent.SEARCH, async (_, query: string, limit: number) => {

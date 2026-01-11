@@ -4,6 +4,11 @@ import { API, APIEvent } from './api'
 const api: API = {
   openSelectFileDialog: async () => ipcRenderer.invoke(APIEvent.OPEN_SELECT_FILE_DIALOG),
   startAnalysis: async (path: string) => ipcRenderer.invoke(APIEvent.START_ANALYSIS, path),
+  onAnalysisProgress: (callback: (progress: { analyzedFiles: number, totalFiles: number }) => void) => {
+    ipcRenderer.on(APIEvent.ANALYSIS_PROGRESS, (_, progress) => {
+      callback(progress);
+    });
+  },
   search: async (query: string, resultsCount: number = 10) => ipcRenderer.invoke(APIEvent.SEARCH, query, resultsCount),
 }
 

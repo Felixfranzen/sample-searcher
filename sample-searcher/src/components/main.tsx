@@ -5,6 +5,18 @@ function App() {
   const [selectedPath, setSelectedPath] = React.useState<string>('')
   const [searchQuery, setSearchQuery] = React.useState<string>('')
   const [searchResults, setSearchResults] = React.useState<any[]>([])
+  const [analysisProgress, setAnalysisProgress] = React.useState<{
+    analyzedFiles: number
+    totalFiles: number
+  } | null>(null)
+  const [isAnalyzing, setIsAnalyzing] = React.useState(false)
+
+  React.useEffect(() => {
+    // Listen for progress updates
+    window.api.onAnalysisProgress((progress: { analyzedFiles: number, totalFiles: number }) => {
+      setAnalysisProgress(progress)
+    })
+  }, [])
 
   const handleSelectDirectory = async () => {
     const path = await window.api.openSelectFileDialog()
@@ -15,7 +27,16 @@ function App() {
   const handleStartAnalysis = async () => {
     if (!selectedPath) return
     console.log('Starting analysis for:', selectedPath)
-    await window.api.startAnalysis(selectedPath)
+    setIsAnalyzing(true)
+    setAnalysisProgress({ analyzedFiles: 0, totalFiles: 0 })
+
+    try {
+      await window.api.startAnalysis(selectedPath)
+    } finally {
+      setIsAnalyzing(false)
+      // Clear progress after a short delay
+      setTimeout(() => setAnalysisProgress(null), 2000)
+    }
   }
 
   const handleSearch = async () => {
@@ -46,17 +67,48 @@ function App() {
       )}
       <button
         onClick={handleStartAnalysis}
-        disabled={!selectedPath}
+        disabled={!selectedPath || isAnalyzing}
         style={{
           padding: '10px 20px',
           fontSize: '16px',
-          cursor: selectedPath ? 'pointer' : 'not-allowed',
+          cursor: (selectedPath && !isAnalyzing) ? 'pointer' : 'not-allowed',
           marginTop: '10px',
-          opacity: selectedPath ? 1 : 0.5
+          opacity: (selectedPath && !isAnalyzing) ? 1 : 0.5
         }}
       >
-        Start Analysis
+        {isAnalyzing ? 'Analyzing...' : 'Start Analysis'}
       </button>
+
+      {analysisProgress && (
+        <div style={{ marginTop: '20px' }}>
+          <div style={{ marginBottom: '10px' }}>
+            <strong>Progress: {analysisProgress.analyzedFiles} / {analysisProgress.totalFiles}</strong>
+            {' '}({analysisProgress.totalFiles > 0 ? Math.round((analysisProgress.analyzedFiles / analysisProgress.totalFiles) * 100) : 0}%)
+          </div>
+          <div style={{
+            width: '100%',
+            height: '30px',
+            backgroundColor: '#f0f0f0',
+            borderRadius: '5px',
+            overflow: 'hidden',
+            position: 'relative'
+          }}>
+            <div style={{
+              width: `${analysisProgress.totalFiles > 0 ? (analysisProgress.analyzedFiles / analysisProgress.totalFiles) * 100 : 0}%`,
+              height: '100%',
+              backgroundColor: '#4CAF50',
+              transition: 'width 0.3s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              fontWeight: 'bold'
+            }}>
+              {analysisProgress.totalFiles > 0 ? Math.round((analysisProgress.analyzedFiles / analysisProgress.totalFiles) * 100) : 0}%
+            </div>
+          </div>
+        </div>
+      )}
 
       <div style={{ marginTop: '30px' }}>
         <h2>Search</h2>
