@@ -99,6 +99,25 @@ function App() {
     })
   }, [])
 
+  // Debounced search effect
+  React.useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([])
+      return
+    }
+
+    const timeoutId = setTimeout(async () => {
+      console.log('Searching for:', searchQuery)
+      const results = await window.api.search(searchQuery, 50)
+      setSearchResults(results)
+      setSelectedFiles(new Set()) // Clear selection on new search
+      setLastSelectedIndex(null)
+      console.log('Search results:', results)
+    }, 300) // 300ms debounce
+
+    return () => clearTimeout(timeoutId)
+  }, [searchQuery])
+
   const handleAddDirectory = async () => {
     const path = await window.api.openSelectFileDialog()
     if (path && path.length > 0) {
@@ -185,7 +204,7 @@ function App() {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', fontFamily: 'system-ui', backgroundColor: '#0a0a0a', color: '#fff' }}>
+    <div style={{ display: 'flex', height: '100vh', fontFamily: monoFont, backgroundColor: '#0a0a0a', color: '#fff' }}>
       {/* Sidebar */}
       <div style={{
         width: '320px',
@@ -346,6 +365,7 @@ function App() {
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="Search samples..."
               style={{
+                fontFamily: monoFont,
                 padding: '10px 14px',
                 fontSize: '14px',
                 flex: 1,
@@ -356,23 +376,6 @@ function App() {
                 outline: 'none'
               }}
             />
-            <button
-              onClick={handleSearch}
-              disabled={!searchQuery.trim()}
-              style={{
-                padding: '10px 20px',
-                fontSize: '14px',
-                cursor: searchQuery.trim() ? 'pointer' : 'not-allowed',
-                opacity: searchQuery.trim() ? 1 : 0.3,
-                backgroundColor: '#fff',
-                color: '#000',
-                border: 'none',
-                borderRadius: '4px',
-                fontWeight: '500'
-              }}
-            >
-              Search
-            </button>
           </div>
           {searchResults.length > 0 && (
             <div style={{ marginTop: '24px' }}>
@@ -382,6 +385,7 @@ function App() {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid #222', textAlign: 'left' }}>
+                    <th style={{ padding: '8px 0', width: "40px", fontSize: '11px', fontWeight: '500', color: '#555', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Rank</th>
                     <th style={{ padding: '8px 0', fontSize: '11px', fontWeight: '500', color: '#555', textTransform: 'uppercase', letterSpacing: '0.5px' }}>File</th>
                     <th style={{ padding: '8px 0', width: '80px', fontSize: '11px', fontWeight: '500', color: '#555', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'right' }}>Distance</th>
                     <th style={{ padding: '8px 0', width: '40px', fontSize: '11px', fontWeight: '500', color: '#555', textAlign: 'center' }}></th>
@@ -414,13 +418,14 @@ function App() {
                           console.log('Drag start:', filesToDrag);
                           window.api.startDragFile(filesToDrag);
                         }}>
-                        <td style={{ padding: '12px 12px' }}>
+                        <td style={{ padding: '12px 12px', fontFamily: monoFont, fontSize: '12px', color: isSelected ? '#888' : '#555', textAlign: 'left'}}>#{index + 1}</td>
+                        <td style={{ padding: '12px 0' }}>
                           {parentPath && (
                             <div style={{
                               fontFamily: monoFont,
                               fontSize: '10px',
                               color: isSelected ? '#888' : '#444',
-                              marginBottom: '2px'
+                              marginBottom: '2px',
                             }}>
                               {parentPath}/
                             </div>
