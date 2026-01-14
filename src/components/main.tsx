@@ -10,6 +10,39 @@ interface Directory {
 
 const monoFont = "'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', 'Droid Sans Mono', 'Source Code Pro', monospace"
 
+// Add custom checkbox styles
+const checkboxStyles = `
+  .custom-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background-color: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s ease;
+  }
+
+  .custom-checkbox:checked {
+    background-color: #888;
+    border-color: #888;
+  }
+
+  .custom-checkbox:checked::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 0px;
+    width: 4px;
+    height: 8px;
+    border: solid #0a0a0a;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+`
+
 function App() {
   const [directories, setDirectories] = React.useState<Directory[]>([])
   const [nextId, setNextId] = React.useState(1)
@@ -17,6 +50,16 @@ function App() {
   const [searchResults, setSearchResults] = React.useState<any[]>([])
   const [selectedFiles, setSelectedFiles] = React.useState<Set<string>>(new Set())
   const [lastSelectedIndex, setLastSelectedIndex] = React.useState<number | null>(null)
+
+  React.useEffect(() => {
+    // Inject checkbox styles
+    const styleElement = document.createElement('style')
+    styleElement.textContent = checkboxStyles
+    document.head.appendChild(styleElement)
+    return () => {
+      document.head.removeChild(styleElement)
+    }
+  }, [])
 
   React.useEffect(() => {
     // Load existing directories on mount
@@ -76,12 +119,18 @@ function App() {
 
   const handleRowClick = (filePath: string, index: number, event: React.MouseEvent) => {
     if (event.shiftKey && lastSelectedIndex !== null) {
-      // Shift+Click: select range
-      const start = Math.min(lastSelectedIndex, index)
-      const end = Math.max(lastSelectedIndex, index)
       const newSelection = new Set(selectedFiles)
-      for (let i = start; i <= end; i++) {
-        newSelection.add(searchResults[i].filePath)
+
+      if (newSelection.has(filePath)) {
+        // Shift+Click on selected row: remove only this specific row
+        newSelection.delete(filePath)
+      } else {
+        // Shift+Click on unselected row: select range
+        const start = Math.min(lastSelectedIndex, index)
+        const end = Math.max(lastSelectedIndex, index)
+        for (let i = start; i <= end; i++) {
+          newSelection.add(searchResults[i].filePath)
+        }
       }
       setSelectedFiles(newSelection)
     } else {
@@ -376,15 +425,10 @@ function App() {
                         <td style={{ padding: '12px 0', textAlign: 'center' }}>
                           <input
                             type="checkbox"
+                            className="custom-checkbox"
                             checked={isSelected}
                             onChange={(e) => handleCheckboxClick(result.filePath, index, e as any)}
                             onClick={(e) => e.stopPropagation()}
-                            style={{
-                              cursor: 'pointer',
-                              width: '14px',
-                              height: '14px',
-                              accentColor: '#4a9eff'
-                            }}
                           />
                         </td>
                       </tr>
