@@ -62,6 +62,20 @@ function App() {
   }, [])
 
   React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSelectedFiles(new Set())
+        setLastSelectedIndex(null)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [])
+
+  React.useEffect(() => {
     // Load existing directories on mount
     const loadDirectories = async () => {
       const existingDirectories = await window.api.getDirectories()
@@ -87,7 +101,7 @@ function App() {
 
   const handleAddDirectory = async () => {
     const path = await window.api.openSelectFileDialog()
-    if (path) {
+    if (path && path.length > 0) {
       const newDirectory: Directory = {
         id: nextId,
         path: path

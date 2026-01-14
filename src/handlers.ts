@@ -16,8 +16,12 @@ export const registerHandlers = ({ service }: { service: Service }) => {
   ipcMain.handle(
     APIEvent.START_ANALYSIS,
     async (event: IpcMainInvokeEvent, dirPath: string) => {
+      if (!dirPath) {
+        throw new Error("Directory path is required");
+      }
       console.log("Start analyzing: ", dirPath);
       await service.analyze(dirPath, (progressEvent) => {
+        console.log(progressEvent, dirPath);
         event.sender.send(APIEvent.ANALYSIS_PROGRESS, {
           directory: {
             path: dirPath,
