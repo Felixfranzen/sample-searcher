@@ -55,7 +55,8 @@ export const createService = ({ model, repository }: { model: ClapModel, reposit
     limit: number
   ) => {
     const textEmbedding = await model.generateTextEmbedding(query);
-    return repository.searchKNN(textEmbedding, limit);
+    const neighbors = await repository.searchKNN(textEmbedding, limit);
+    return neighbors.filter(n => n.distance < 0.7); // filter out distant results
   };
 
   const deleteDirectory = (directoryId: number) => {
