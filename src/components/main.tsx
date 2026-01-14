@@ -278,7 +278,15 @@ function App() {
                     const fileName = parts.pop() || result.filePath;
                     const parentPath = parts.join('/');
                     return (
-                      <tr key={index} style={{ borderBottom: '1px solid #1a1a1a' }}>
+                      <tr 
+                        key={index}
+                        draggable
+                        style={{ borderBottom: '1px solid #1a1a1a', cursor: 'grab' }} 
+                        onDragStart={(event) => {
+                          console.log('Drag start:', result.filePath);
+                          event.preventDefault();
+                          window.api.startDragFile(result.filePath);
+                        }}>
                         <td style={{ padding: '12px 0' }}>
                           {parentPath && (
                             <div style={{

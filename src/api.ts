@@ -4,7 +4,8 @@ export enum APIEvent {
     ANALYSIS_PROGRESS = 'ANALYSIS_PROGRESS',
     SEARCH = 'SEARCH',
     DELETE_DIRECTORY = "DELETE_DIRECTORY",
-    GET_DIRECTORIES = "GET_DIRECTORIES"
+    GET_DIRECTORIES = "GET_DIRECTORIES",
+    ON_DRAG_FILE_START = "ON_DRAG_FILE_START"
 }
 
 export type API = {
@@ -21,4 +22,6 @@ export type API = {
   }) => void) => void
   deleteDirectory: (directoryId: number) => void
   getDirectories: () => Promise<Array<{ id: number, path: string, totalFiles: number, analyzedFiles: number }>>
+
+  startDragFile: (filePath: string) => void
 }

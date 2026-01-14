@@ -17,7 +17,15 @@
     </style>
   </head>
   <body>
+    <div style="border:2px solid black;border-radius:3px;padding:5px;display:inline-block" draggable="true" id="drag">Drag me</div>
     <div id="root"></div>
     <script type="module" src="/src/components/main.tsx"></script>
+    <script>
+      console.log(window.api)
+      document.getElementById('drag').ondragstart = (event) => {
+        event.preventDefault()
+        window.api.startDragFile('/Users/felixfranzen/Documents/Music production/Samples/Drain Gang Drums/Whitearmor Kit/clap/clap (nosebleed).wav')
+      }
+    </script>
   </body>
 </html>

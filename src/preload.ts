@@ -11,7 +11,11 @@ const api: API = {
   },
   search: async (query: string, resultsCount: number = 10) => ipcRenderer.invoke(APIEvent.SEARCH, query, resultsCount),
   deleteDirectory: (directoryId: number) => ipcRenderer.invoke(APIEvent.DELETE_DIRECTORY, directoryId),
-  getDirectories: async () => ipcRenderer.invoke(APIEvent.GET_DIRECTORIES)
+  getDirectories: async () => ipcRenderer.invoke(APIEvent.GET_DIRECTORIES),
+
+  startDragFile: (fileName) => {
+    ipcRenderer.invoke(APIEvent.ON_DRAG_FILE_START, fileName)
+  }
 }
 
 contextBridge.exposeInMainWorld('api', api)

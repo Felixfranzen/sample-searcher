@@ -1,8 +1,16 @@
-import { dialog, ipcMain, IpcMainInvokeEvent } from "electron";
+import { dialog, ipcMain, IpcMainInvokeEvent, nativeImage } from "electron";
 import { APIEvent } from "./api";
 import { Service } from "./service/service";
+import path from 'path'
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const iconPath = path.join(__dirname, '../public/drag-icon.png')
+const iconTiny = nativeImage.createFromPath(iconPath).resize({ width: 16, height: 16 })
+
 
 export const registerHandlers = ({ service }: { service: Service }) => {
+
   ipcMain.handle(APIEvent.OPEN_SELECT_FILE_DIALOG, async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog({
       properties: ["openDirectory"],
@@ -42,4 +50,13 @@ export const registerHandlers = ({ service }: { service: Service }) => {
     console.log('Getting directories')
     return service.getDirectories()
   })
+
+  ipcMain.handle(APIEvent.ON_DRAG_FILE_START, (event, filePath) => {
+    console.log('Start drag', filePath)
+    event.sender.startDrag({
+      file: filePath,
+      icon: iconTiny
+    })
+  })
+
 };
