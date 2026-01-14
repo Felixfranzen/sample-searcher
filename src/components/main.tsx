@@ -338,7 +338,7 @@ function App() {
                         style={{
                           borderBottom: '1px solid #1a1a1a',
                           // cursor: 'grab',
-                          backgroundColor: isSelected ? '#1a2a3a' : 'transparent',
+                          backgroundColor: isSelected ? '#2a2a2a' : 'transparent',
                           transition: 'background-color 0.15s ease'
                         }}
                         onDragStart={(event) => {
@@ -356,7 +356,7 @@ function App() {
                             <div style={{
                               fontFamily: monoFont,
                               fontSize: '10px',
-                              color: isSelected ? '#6a9fb5' : '#444',
+                              color: isSelected ? '#888' : '#444',
                               marginBottom: '2px'
                             }}>
                               {parentPath}/
@@ -365,12 +365,12 @@ function App() {
                           <div style={{
                             fontFamily: monoFont,
                             fontSize: '13px',
-                            color: isSelected ? '#b3d9ff' : '#ccc'
+                            color: isSelected ? '#ddd' : '#ccc'
                           }}>
                             {fileName}
                           </div>
                         </td>
-                        <td style={{ padding: '12px 0', fontFamily: monoFont, fontSize: '12px', color: isSelected ? '#6a9fb5' : '#555', textAlign: 'right' }}>
+                        <td style={{ padding: '12px 0', fontFamily: monoFont, fontSize: '12px', color: isSelected ? '#888' : '#555', textAlign: 'right' }}>
                           {typeof result.distance === 'number' ? result.distance.toFixed(3) : result.distance}
                         </td>
                         <td style={{ padding: '12px 0', textAlign: 'center' }}>
