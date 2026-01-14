@@ -22,6 +22,7 @@ export default defineConfig({
                 'fluent-ffmpeg',
                 'fs-extra',
                 '@xenova/transformers',
+                'canvas',
               ],
             },
           },
