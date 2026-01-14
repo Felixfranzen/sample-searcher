@@ -1,8 +1,11 @@
 import { dialog, ipcMain, IpcMainInvokeEvent } from "electron";
 import { APIEvent } from "./api";
 import { Service } from "./service/service";
+import path from 'path'
+import { createDragIcon } from "./utils/dragIcon";
 
 export const registerHandlers = ({ service }: { service: Service }) => {
+
   ipcMain.handle(APIEvent.OPEN_SELECT_FILE_DIALOG, async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog({
       properties: ["openDirectory"],
@@ -42,4 +45,18 @@ export const registerHandlers = ({ service }: { service: Service }) => {
     console.log('Getting directories')
     return service.getDirectories()
   })
+
+  ipcMain.handle(APIEvent.ON_DRAG_FILE_START, (event, filePaths: string[]) => {
+    if (filePaths.length === 0) { return; }
+    const dragIcon = filePaths.length > 1
+      ? createDragIcon(`${filePaths.length} files`)
+      : createDragIcon(path.basename(filePaths[0]))
+
+    event.sender.startDrag({
+      file: filePaths[0],
+      files: filePaths, // overrides .file if multiple files are provided
+      icon: dragIcon,
+    })
+  })
+
 };
