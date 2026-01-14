@@ -1,4 +1,4 @@
-import { dialog, ipcMain, IpcMainInvokeEvent, nativeImage } from "electron";
+import { dialog, ipcMain, IpcMainInvokeEvent } from "electron";
 import { APIEvent } from "./api";
 import { Service } from "./service/service";
 import path from 'path'
@@ -6,7 +6,6 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const iconPath = path.join(__dirname, '../public/drag-icon.png')
-const iconTiny = nativeImage.createFromPath(iconPath).resize({ width: 16, height: 16 })
 
 
 export const registerHandlers = ({ service }: { service: Service }) => {
@@ -55,7 +54,7 @@ export const registerHandlers = ({ service }: { service: Service }) => {
     console.log('Start drag', filePath)
     event.sender.startDrag({
       file: filePath,
-      icon: iconTiny
+      icon: iconPath,
     })
   })
 
