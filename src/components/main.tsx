@@ -15,6 +15,8 @@ function App() {
   const [nextId, setNextId] = React.useState(1)
   const [searchQuery, setSearchQuery] = React.useState<string>('')
   const [searchResults, setSearchResults] = React.useState<any[]>([])
+  const [selectedFiles, setSelectedFiles] = React.useState<Set<string>>(new Set())
+  const [lastSelectedIndex, setLastSelectedIndex] = React.useState<number | null>(null)
 
   React.useEffect(() => {
     // Load existing directories on mount
@@ -67,7 +69,56 @@ function App() {
     console.log('Searching for:', searchQuery)
     const results = await window.api.search(searchQuery, 50)
     setSearchResults(results)
+    setSelectedFiles(new Set()) // Clear selection on new search
+    setLastSelectedIndex(null)
     console.log('Search results:', results)
+  }
+
+  const handleRowClick = (filePath: string, index: number, event: React.MouseEvent) => {
+    if (event.shiftKey && lastSelectedIndex !== null) {
+      // Shift+Click: select range
+      const start = Math.min(lastSelectedIndex, index)
+      const end = Math.max(lastSelectedIndex, index)
+      const newSelection = new Set(selectedFiles)
+      for (let i = start; i <= end; i++) {
+        newSelection.add(searchResults[i].filePath)
+      }
+      setSelectedFiles(newSelection)
+    } else {
+      // Regular click: select only this file
+      setSelectedFiles(new Set([filePath]))
+      setLastSelectedIndex(index)
+    }
+  }
+
+  const handleCheckboxClick = (filePath: string, index: number, event: React.MouseEvent) => {
+    if (event.shiftKey && lastSelectedIndex !== null) {
+      // Shift+Click on checkbox: select/deselect range
+      const start = Math.min(lastSelectedIndex, index)
+      const end = Math.max(lastSelectedIndex, index)
+      const newSelection = new Set(selectedFiles)
+      const shouldSelect = !selectedFiles.has(filePath)
+      for (let i = start; i <= end; i++) {
+        if (shouldSelect) {
+          newSelection.add(searchResults[i].filePath)
+        } else {
+          newSelection.delete(searchResults[i].filePath)
+        }
+      }
+      setSelectedFiles(newSelection)
+    } else {
+      // Regular checkbox click: toggle file in selection set
+      setSelectedFiles(prev => {
+        const newSet = new Set(prev)
+        if (newSet.has(filePath)) {
+          newSet.delete(filePath)
+        } else {
+          newSet.add(filePath)
+        }
+        return newSet
+      })
+      setLastSelectedIndex(index)
+    }
   }
 
   return (
@@ -270,6 +321,7 @@ function App() {
                   <tr style={{ borderBottom: '1px solid #222', textAlign: 'left' }}>
                     <th style={{ padding: '8px 0', fontSize: '11px', fontWeight: '500', color: '#555', textTransform: 'uppercase', letterSpacing: '0.5px' }}>File</th>
                     <th style={{ padding: '8px 0', width: '80px', fontSize: '11px', fontWeight: '500', color: '#555', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'right' }}>Distance</th>
+                    <th style={{ padding: '8px 0', width: '40px', fontSize: '11px', fontWeight: '500', color: '#555', textAlign: 'center' }}></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -277,22 +329,34 @@ function App() {
                     const parts = result.filePath.split('/');
                     const fileName = parts.pop() || result.filePath;
                     const parentPath = parts.join('/');
+                    const isSelected = selectedFiles.has(result.filePath);
                     return (
-                      <tr 
+                      <tr
                         key={index}
                         draggable
-                        style={{ borderBottom: '1px solid #1a1a1a', cursor: 'grab' }} 
+                        onClick={(e) => handleRowClick(result.filePath, index, e)}
+                        style={{
+                          borderBottom: '1px solid #1a1a1a',
+                          // cursor: 'grab',
+                          backgroundColor: isSelected ? '#1a2a3a' : 'transparent',
+                          transition: 'background-color 0.15s ease'
+                        }}
                         onDragStart={(event) => {
-                          console.log('Drag start:', result.filePath);
                           event.preventDefault();
-                          window.api.startDragFile(result.filePath);
+                          // If dragging a selected file, drag all selected files
+                          // Otherwise, drag just this file
+                          const filesToDrag = isSelected && selectedFiles.size > 0
+                            ? Array.from(selectedFiles)
+                            : [result.filePath];
+                          console.log('Drag start:', filesToDrag);
+                          window.api.startDragFile(filesToDrag);
                         }}>
-                        <td style={{ padding: '12px 0' }}>
+                        <td style={{ padding: '12px 12px' }}>
                           {parentPath && (
                             <div style={{
                               fontFamily: monoFont,
                               fontSize: '10px',
-                              color: '#444',
+                              color: isSelected ? '#6a9fb5' : '#444',
                               marginBottom: '2px'
                             }}>
                               {parentPath}/
@@ -301,13 +365,27 @@ function App() {
                           <div style={{
                             fontFamily: monoFont,
                             fontSize: '13px',
-                            color: '#ccc'
+                            color: isSelected ? '#b3d9ff' : '#ccc'
                           }}>
                             {fileName}
                           </div>
                         </td>
-                        <td style={{ padding: '12px 0', fontFamily: monoFont, fontSize: '12px', color: '#555', textAlign: 'right' }}>
+                        <td style={{ padding: '12px 0', fontFamily: monoFont, fontSize: '12px', color: isSelected ? '#6a9fb5' : '#555', textAlign: 'right' }}>
                           {typeof result.distance === 'number' ? result.distance.toFixed(3) : result.distance}
+                        </td>
+                        <td style={{ padding: '12px 0', textAlign: 'center' }}>
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => handleCheckboxClick(result.filePath, index, e as any)}
+                            onClick={(e) => e.stopPropagation()}
+                            style={{
+                              cursor: 'pointer',
+                              width: '14px',
+                              height: '14px',
+                              accentColor: '#4a9eff'
+                            }}
+                          />
                         </td>
                       </tr>
                     );

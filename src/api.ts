@@ -23,5 +23,5 @@ export type API = {
   deleteDirectory: (directoryId: number) => void
   getDirectories: () => Promise<Array<{ id: number, path: string, totalFiles: number, analyzedFiles: number }>>
 
-  startDragFile: (filePath: string) => void
+  startDragFile: (filePaths: string[]) => void
 }

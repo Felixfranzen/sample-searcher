@@ -13,8 +13,8 @@ const api: API = {
   deleteDirectory: (directoryId: number) => ipcRenderer.invoke(APIEvent.DELETE_DIRECTORY, directoryId),
   getDirectories: async () => ipcRenderer.invoke(APIEvent.GET_DIRECTORIES),
 
-  startDragFile: (fileName) => {
-    ipcRenderer.invoke(APIEvent.ON_DRAG_FILE_START, fileName)
+  startDragFile: (filePaths: string[]) => {
+    ipcRenderer.invoke(APIEvent.ON_DRAG_FILE_START, filePaths)
   }
 }
 

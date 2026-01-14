@@ -84,13 +84,17 @@ export const registerHandlers = ({ service }: { service: Service }) => {
     return service.getDirectories()
   })
 
-  ipcMain.handle(APIEvent.ON_DRAG_FILE_START, (event, filePath: string) => {
-    console.log('Start drag', filePath)
-    const filename = path.basename(filePath)
-    const dragIcon = createDragIcon(filename)
+  ipcMain.handle(APIEvent.ON_DRAG_FILE_START, (event, filePaths: string[]) => {
+    if (filePaths.length === 0) { return; }
+    const dragIcon = filePaths.length > 1
+      ? createDragIcon(`${filePaths.length} files`)
+      : createDragIcon(path.basename(filePaths[0]))
+    
+console.log('Start drag', filePaths)
 
     event.sender.startDrag({
-      file: filePath,
+      file: filePaths[0],
+      files: filePaths, // overrides .file if multiple files are provided
       icon: dragIcon,
     })
   })
