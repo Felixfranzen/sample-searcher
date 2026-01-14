@@ -212,13 +212,14 @@ function App() {
         borderRight: '1px solid #222',
         display: 'flex',
         flexDirection: 'column',
-        padding: '12px'
+        padding: '12px 6px 12px 12px'
       }}>
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center',
-          marginBottom: '12px'
+          marginBottom: '12px',
+          marginRight: '6px'
         }}>
           <span style={{ 
             fontSize: '11px', 
@@ -244,7 +245,7 @@ function App() {
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+        <div style={{ flex: 1, overflowY: 'auto', paddingRight: '6px' }}>
           {directories.length === 0 ? (
             <p style={{ color: '#444', textAlign: 'center', marginTop: '20px', fontSize: '12px' }}>
               No directories
